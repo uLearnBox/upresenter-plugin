@@ -38,7 +38,7 @@ For a "summarize" or "review" request, read everything and answer in chat; chang
 | Rearrange content | `setContainerLayout`, `moveShapeForward` / `Backward` / `ToFront` / `ToBack`, `duplicateShape`, `deleteShape` |
 | Add a designed slide | `listTemplates` / `getTemplateLayouts` for the deck's template (`templateId` in `getPresentationInfo`), then `insertTemplateSlides {slides: [{tag}], index}` and fill the returned `slots` with `setShapeText` |
 | Update a chart's numbers | `setChartData {slideId, shapeId, labels, datasets}` |
-| Restyle the whole deck | Pick a template with `listTemplates`, then `insertTemplateSlides {templateId, slides: [{tag}], applyThemeFromTemplate: true}` switches the theme (colors and fonts) of every slide; remove the helper slide afterwards with `deleteSlide` if you only wanted the theme |
+| Restyle the whole deck | Pick a template with `listTemplates`, then `insertTemplateSlides {templateId, applyThemeFromTemplate: true}` (no slides) switches the theme, the colors and fonts of every slide, like the Design tab. Slides keep their own layouts and decor |
 | Add a blank slide | `addSlide {slideType: "blank", index}` (always pass `index`), then `add*` tools |
 | Reorder or remove slides | `duplicateSlide`, `deleteSlide`, `goToSlide` |
 | Rename the deck or a slide | `setPresentationName`, `setSlideName`, `setSlideTitle` |

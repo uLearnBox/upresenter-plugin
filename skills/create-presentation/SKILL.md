@@ -6,9 +6,10 @@ description: "Build a complete, professionally designed interactive presentation
 # Create a presentation in uPresenter
 
 uPresenter is a web editor for interactive presentations and e-learning. It has a gallery of
-**templates**: libraries of professionally designed slides in one visual style. This skill builds a
-deck the way a designer builds with a template: choose the design first, plan only the slides the
-request needs, insert the matching layouts, then replace every placeholder with real content. The
+**templates**: each one a design language (theme with colors and fonts, plus a library of layouts
+in that style). This skill builds a deck the way a template is built, with real content instead of
+placeholders: choose the design language, set the deck's style, plan only the slides the request
+needs, insert the matching layouts, then replace every placeholder with real content. The
 result should be a deck the user would be proud to present: accurate content, one visual identity,
 a clear structure, and interactivity where it helps learning.
 
@@ -43,7 +44,11 @@ length the user asked for, and the mood if they gave one. Infer sensible default
 would really change the deck. Content accuracy matters more than anything else: if the user gave a
 source, stay faithful to it.
 
-### 2. Choose the design: pick a template
+### 2. Choose the design language: pick a template
+
+Every template is one **design language**: a theme (colors and fonts, what the Design tab
+holds) plus a library of layouts drawn in that style ("Swiss Editorial", "Duotone Mono",
+"Warm Classroom"...). Choosing the language comes first, before any slide exists.
 
 1. `listTemplates` with a `query` or `category` that matches the genre or mood ("pitch", "lesson",
    "report", "quiz", "dark") and the `language` of the deck. Read each result's `description`,
@@ -77,36 +82,46 @@ should take away), the **layout tag** that carries it, and the **real content** 
   your knowledge, headlines that state a claim ("Revenue grows 4.5x in three years"), not topic
   labels ("Revenue").
 
-### 4. Get the deck open
+### 4. Open the deck and set its style
 
-1. `listOpenEditorContexts`. If the user already has a deck open and wants to build in it, use it
-   and give the first insert `applyThemeFromTemplate: true` so the deck takes the template's
-   theme. If the open deck's own template is the one you picked, no theme change is needed.
-2. Otherwise `getNewPresentationLink` with the `templateId` of the chosen template. Give the link
-   to the user: opening it **creates a presentation from the template** and opens it in the
-   editor. Ask them to keep that tab open, then call `listOpenEditorContexts` again. If several
-   editors are open, pass the `sessionId` of the right one to every editing tool.
-3. A new deck from a template starts with one cover slide. `getPresentationInfo` shows the deck's
-   `templateId`, and `getPresentationState` with `scope: "presentation_basic"` what is there. Call
-   `setPresentationName` and `setPresentationLanguage` (BCP-47, for example `vi-VN`) now.
+A deck made with "Create Blank" is not empty of design: it starts from a template of its own
+(the dialog preselects one) with that template's theme and a starter cover. So whatever deck the
+user has, set the style first, then build.
+
+1. `listOpenEditorContexts`. If the user has a deck open, use it. If none is open,
+   `getNewPresentationLink` with the `templateId` of the chosen template gives the user a link:
+   opening it **creates a presentation from the template** and opens it in the editor. Ask them to
+   keep that tab open, then call `listOpenEditorContexts` again. If several editors are open, pass
+   the `sessionId` of the right one to every editing tool.
+2. `getPresentationInfo` shows the deck's `templateId`. If it is **not** the template you chose,
+   switch the deck's style: `insertTemplateSlides {templateId: <chosen>, applyThemeFromTemplate:
+   true}` with no `slides` changes only the theme (colors and fonts of every slide), like picking a
+   theme in the Design tab. Do it before building, so everything that follows already has the
+   chosen look. Pass the chosen `templateId` in **every** `insertTemplateSlides` call: without it
+   the tool uses the deck's own starter template.
+3. `getPresentationState` with `scope: "all_slides"` shows the starter slide. If the deck's own
+   template is the chosen one, keep its cover and fill it. Otherwise it belongs to the other
+   template: you will insert the chosen template's `title` layout at index 0 and delete the
+   starter slide with `deleteSlide`.
+4. Call `setPresentationName` and `setPresentationLanguage` (BCP-47, for example `vi-VN`).
 
 ### 5. Read the layouts and pick slides
 
 `getTemplateLayouts {templateId}` once, then choose for every planned slide a concrete `slideId`:
 among variants with the same tag take the one whose `maxChars` budgets hold your text, and vary
-the variants when a tag repeats (`template-layouts.md`, section 5). Keep the cover the deck started
-with unless another `title` variant suits the topic better.
+the variants when a tag repeats (`template-layouts.md`, section 5).
 
 ### 6. Insert the planned layouts
 
-`insertTemplateSlides {slides: [{slideId}, ...], index}` inserts the layouts in one call, in order,
-at an exact position (`index` is the position of the first one; the deck's own cover is index 0, so
-the rest start at 1). Add `templateId` when the deck was not created from the chosen template. A `tag` instead of a `slideId` takes the first slide with that tag. Insert the
-slides in the planned order, then fill them one by one. Each result lists the new slides with their
-`slideId`, `slideIndex` and `slots` (the shapes to fill: `shapeId`, `role`, `maxChars`, `prompt`),
-plus `chartShapeId`, `tableShapeId`, `questionShapeId`, `entryCount` and `imageSlots` where the layout
-has them. The deck's own cover was not inserted by you: `goToSlide`, then `getPresentationState`
-with `scope: "current_slide"` lists its text shapes (`placeholder`, `maxChars`).
+`insertTemplateSlides {templateId, slides: [{slideId}, ...], index}` inserts the layouts in one
+call, in the planned order, at an exact position (`index` is the position of the first one). A
+`tag` instead of a `slideId` takes the first slide with that tag. Insert at index 0 when the
+starter cover is replaced, otherwise after the kept cover (index 1), then delete the starter slide
+if there is one. Each result lists the new slides with their `slideId`, `slideIndex` and `slots`
+(the shapes to fill: `shapeId`, `role`, `maxChars`, `prompt` or `sample`), plus `chartShapeId`,
+`tableShapeId`, `questionShapeId`, `entryCount` and `imageSlots` where the layout has them. A cover
+you kept was not inserted by you: `goToSlide`, then `getPresentationState` with `scope:
+"current_slide"` lists its text shapes (`placeholder`, `maxChars`).
 
 ### 7. Fill every slot with real content
 
@@ -164,7 +179,7 @@ template.
 | "More than one editor tab is open" | Call `listOpenEditorContexts` and pass the `sessionId`. |
 | `listTemplates` returns nothing | Remove the `query` or `category`, widen `language`, or pass `includeLegacy: true`. |
 | `insertTemplateSlides` says a slide was not found | Take the `slideId` or `tag` from `getTemplateLayouts` of the same template. |
-| The inserted slides look different from the rest | They came from another template: insert again with the deck's own template, or restyle the whole deck with `applyThemeFromTemplate: true`. |
+| The inserted slides look different from the rest | The deck's style and the layouts come from different templates. Switch the style with `insertTemplateSlides {templateId, applyThemeFromTemplate: true}` (no slides) and pass the chosen `templateId` on every insert. |
 | A slide still shows "Click to add title" | A slot was not filled: fill it or `deleteShape` it, then audit again. |
 | Text spills out of its card | Shorten it to the slot's `maxChars`, or move the slide to a variant with a larger budget. |
 | Edit landed on the wrong slide | A tool without `slideId` ran after the current slide changed. Pass `slideId` and `shapeId` every time. |

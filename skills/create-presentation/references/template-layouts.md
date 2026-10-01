@@ -139,10 +139,11 @@ content`). They differ in composition and budgets. From `getTemplateLayouts` wit
 
 - **Inserting the whole library.** Insert only what the outline needs. A 10-slide request gets 10
   slides, whatever the template offers.
-- **Inserting before the template is the deck's.** `insertTemplateSlides` without `templateId`
-  uses the template the deck was created from. A different `templateId` clones that template's
-  slides into the deck; add `applyThemeFromTemplate: true` or the slides look foreign. The theme
-  change restyles the **whole** deck, so decide on the template before building and do not switch
+- **Mixing styles.** `insertTemplateSlides` without `templateId` uses the template the deck was
+  created from, and a deck made with "Create Blank" starts from whatever template the dialog had
+  selected. Pass the chosen `templateId` on every insert, and switch the deck's theme first with
+  `applyThemeFromTemplate: true` (no slides needed), or the layouts look foreign. The theme change
+  restyles the **whole** deck, so decide on the template before building and do not switch
   halfway.
 - **Writing text before reading the budgets.** Draft the content in the plan, then fit it to the
   slots when you fill: shorten rather than overflow.

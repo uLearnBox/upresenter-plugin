@@ -45,8 +45,9 @@ when more than one editor tab is open.
 
 - `insertTemplateSlides {slides: [{slideId} | {tag}], index?, templateId?, applyThemeFromTemplate?}`
   clones template layouts into the open deck, in order, starting at `index` (default: after the
-  current slide). `templateId` defaults to the deck's own template. `applyThemeFromTemplate`
-  also switches the deck to the template's theme (restyles every slide; no credits). Returns each
+  current slide). `templateId` defaults to the deck's own template (pass the chosen one). With
+  `applyThemeFromTemplate: true` the deck also switches to the template's theme (restyles every
+  slide; no credits); with that flag and no `slides` only the theme changes. Returns each
   new slide's `slideId`, `slideIndex`, `tag` and `slots`, plus `chartShapeId`, `tableShapeId`,
   `questionShapeId`, `entryCount` and `imageSlots` where present. Slots still show their prompt until `setShapeText`
   fills them; `getPresentationState` marks them with `placeholder` and gives `maxChars`.
