@@ -119,6 +119,22 @@ paragraph. Take `slideId` and `shapeId` from the insert result and pass both.
   unless the user gave you a picture: then `replaceImage {slideId, shapeId, source}` with that
   public HTTPS URL. Never invent image URLs. If a sample picture clashes with the topic, choose a
   variant without image slots and say so in the report.
+- **Generated pictures (only when the connection offers `generateShapeImage`).** It fills a picture
+  slot from a text prompt and **spends the account's credits for every picture**; its description
+  lists the models and the prices. So:
+  1. Plan which slots get a generated picture: only slots with no picture from the user and no
+     suitable sample. Prefer fewer, larger pictures: a cover and a few key slides, not every card.
+  2. Before generating, tell the user how many pictures and what they cost in credits, and wait
+     for a yes. Stay within what they agreed to.
+  3. One call per picture, with the slot's `shapeId` (from `imageSlots` of `insertTemplateSlides`,
+     or `addImagePlaceholder`). Write the prompt in English: subject, setting, light, style; one
+     clear subject; no text in the picture and no close-up hands or faces unless the slide needs
+     them. Pick the model for the job: `fu` for photographs, `rc3` for illustrations, `fs` (cheap)
+     only for scenery and objects without people. The aspect ratio follows the slot.
+  4. Look at every generated picture with `getSlideImage`. Distorted hands or faces, gibberish
+     lettering or a picture that does not match the slide: regenerate that one picture once, and
+     ask before spending credits a second time.
+  5. In the report list the generated pictures and the credits left (`creditsRemaining`).
 - **Math:** write each equation, power or fraction as `[[katex:LATEX]]` inside the text, in any
   text slot, answer or table cell: it becomes a typeset formula. Never type math as plain characters
   (`x^2`, `x²`). Details: `math-formulas.md`.

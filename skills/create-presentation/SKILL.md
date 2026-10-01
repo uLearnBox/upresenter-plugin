@@ -148,7 +148,9 @@ Slide by slide, in order. For every slot of every inserted slide:
   template's figures in your deck.
 - Tables: `editTableStructure` to the shape of your data, then `setTableCellsText`. Questions: `setQuestionAnswers` and
   `setQuestionSettings` (the `create-quiz` skill). Images: keep the template's sample picture, or
-  `replaceImage` with a real public HTTPS URL the user gave you; never invent URLs.
+  `replaceImage` with a real public HTTPS URL the user gave you; never invent URLs. When the
+  connection offers `generateShapeImage`, new pictures can fill the slots that have none: see
+  `references/template-layouts.md`, section 4, for the cost agreement and how to prompt.
 - A slot the content has no use for: `deleteShape`, rather than leaving the prompt visible.
 - **Math is a formula, never plain characters.** Every equation, power, fraction, root, symbol or
   derivation goes into the text as `[[katex:LATEX]]`, for example `Expand [[katex:(a+b)^2]]`. Typing
@@ -216,8 +218,8 @@ and `getQuestionsInfo` check the content.
 Tell the user, one line per slide, what was created and which template was used; that the deck was
 reviewed and what you fixed; which features were used (charts, questions, interactions); and
 anything that needs their input: problems you could not fix, facts to confirm,
-pictures to replace (list the slides whose sample picture stays), accents to check in a non-English
-deck. Suggest next steps: preview in the player, share, export for an LMS, or restyle with another
+pictures to replace (list the slides whose sample picture stays), pictures you generated and the
+credits left, accents to check in a non-English deck. Suggest next steps: preview in the player, share, export for an LMS, or restyle with another
 template.
 
 ## Troubleshooting

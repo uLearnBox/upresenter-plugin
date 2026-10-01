@@ -64,6 +64,9 @@ when more than one editor tab is open.
   new slide's `slideId`, `slideIndex`, `tag` and `slots`, plus `chartShapeId`, `tableShapeId`,
   `questionShapeId`, `entryCount` and `imageSlots` where present. Slots still show their prompt until `setShapeText`
   fills them; `getPresentationState` marks them with `placeholder` and gives `maxChars`.
+- `generateShapeImage {shapeId, prompt, model?, ratio?, style?}` (offered only on some connections)
+  generates a picture into an image slot and spends credits; the result has `creditsRemaining`.
+  Rules for its use: `template-layouts.md`, section 4.
 - `addSlide {slideType: "blank", index}` returns `{slideId, slideIndex}` and focuses the slide
 - `duplicateSlide {}` (current slide), `deleteSlide {slideId}`, `goToSlide {slideId}`
 - `setSlideName {slideId, name}` (outline label), `setSlideTitle {slideId, title}`

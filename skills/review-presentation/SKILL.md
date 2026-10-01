@@ -62,7 +62,8 @@ wrong and the fix.
 **Design consistency**
 - One theme, one set of fonts; slides look like one deck.
 - Layout variety: not the same layout many times in a row.
-- Pictures are relevant, sharp and not stretched; decor does not compete with content.
+- Pictures are relevant, sharp and not stretched; decor does not compete with content. Generated
+  pictures have no distorted hands or faces and no gibberish lettering.
 
 **Math and language**
 - Equations are formulas, not characters (`x^2`, `x²`); formulas render correctly.
