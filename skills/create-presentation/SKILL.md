@@ -54,9 +54,15 @@ holds) plus a library of layouts drawn in that style ("Swiss Editorial", "Duoton
    "report", "quiz", "dark") and the `language` of the deck. Read each result's `description`,
    `categories`, `layouts` (tag counts), `language`, `palette` and `fonts`. The tags the plan needs
    must exist in the template: a `timeline`, a `chart`, `list-5`, the `question-*` types of a quiz.
-2. Pick **one** template for the whole deck and tell the user which and why in one line ("Swiss
-   Editorial: a clean grid that suits a business plan"). If nothing fits, relax the filters or pass
-   `includeLegacy: true`; if still nothing, build from blank slides with
+2. **Suggest, do not just pick.** Shortlist two or three templates and put them to the user in one
+   short message: for each its name, what it looks like in a few words (from `description`,
+   `palette` colors and `fonts`), why it suits this request, and which of the layouts the plan needs
+   it has. Say which one you recommend and ask which to use. The user can preview every template in
+   the Templates page of their uPresenter dashboard. **Stop and wait for the answer** before any
+   editing call. Skip the question only when the user already named a template or style, or asked
+   you to choose for them: then pick one and say which and why in one line.
+3. **One template for the whole deck.** If nothing fits, relax the filters or pass
+   `includeLegacy: true`; if still nothing, say so and build from blank slides with
    `references/build-from-blank.md`.
 
 Details on reading templates and tags: `references/template-layouts.md`.
@@ -147,6 +153,9 @@ Slide by slide, in order. For every slot of every inserted slide:
 - Do not touch colors, fonts or sizes. If the layout cannot hold the content, change the layout
   (another variant or tag), not the styling.
 
+Check as you build: after filling a slide, or a few slides, run `reviewSlides {slideIds: [...]}`
+(step 9) and fix what it reports before moving on, so mistakes do not pile up.
+
 If a call fails, read the error and fix the call. Do not retry the same arguments.
 
 ### 8. Interactivity and quizzes (when it helps learning)
@@ -156,23 +165,38 @@ and 5), and they work on template slides too. Quiz questions use the template's 
 layouts: follow the `create-quiz` skill. For graded e-learning also set `setCompletionCriteria`,
 `setSuccessCriteria`, `setMaxAttempts` and `setResumeOption`.
 
-### 9. Audit
+### 9. Review the result and fix it
 
-`getPresentationState` with `scope: "all_slides"` and `getQuestionsInfo`, and check:
+Never report a deck you have not reviewed. `reviewSlides` shows each slide in the editor, measures
+how it really renders and returns the problems per slide; `getPresentationState` and
+`getQuestionsInfo` check the content.
 
-- no shape has a `placeholder` field, and no figure, label, table cell or timeline entry still holds
-  the template's sample (read the texts of each slide: dates, percentages and numbers from the
-  sample must match your content);
-- every text fits its `maxChars`; the headline of each slide states its message;
-- the order matches the outline; every graded question has a correct answer;
-- no two neighbouring slides repeat the same layout without a reason.
+1. `reviewSlides {}` for the whole deck. If the result has `remaining`, call it again with those
+   `slideIds`. Each issue has a `kind`, the `shapeId` and, for spills, `spillPx` (how far, in
+   pixels):
 
-Fix what the audit finds before reporting.
+   | kind | What is wrong | Fix |
+   |---|---|---|
+   | `placeholder` | A slot still shows its prompt | `setShapeText` with the content, or `deleteShape` |
+   | `spillsOutOfBox`, `outsideCard` | Text runs past its own box or the card it sits in | Shorten the text (keep it within `maxChars`, and shorter in languages with long words), or move the slide to a variant with a bigger budget; `setTextStyle` with a smaller size only as a last resort and never below about 75% |
+   | `outsideSlide` | Text runs past the edge of the slide | Same, and if the content is too much for one slide, split it into two slides |
+   | `overlapsText` | Two texts lie on top of each other (`shapeId`, `otherShapeId`) | Shorten the longer one or choose another layout |
+   | `plainMath` | Math typed as plain characters | Rewrite it as `[[katex:LATEX]]` (`references/math-formulas.md`) |
+
+2. Fix the issues, then `reviewSlides {slideIds: [the problem slides]}` again. Repeat until the
+   slides are clean, at most three rounds. Tell the user about anything you could not fix.
+3. Content checks with `getPresentationState` (`scope: "all_slides"`) and `getQuestionsInfo`:
+   - no figure, label, table cell or timeline entry still holds the template's sample (read the
+     texts of each slide: dates, percentages and numbers from the sample must match your content);
+   - every text fits its `maxChars`; the headline of each slide states its message;
+   - the order matches the outline; every graded question has a correct answer;
+   - no two neighbouring slides repeat the same layout without a reason.
 
 ### 10. Report
 
-Tell the user, one line per slide, what was created and which template was used; which features
-were used (charts, questions, interactions); and anything that needs their input: facts to confirm,
+Tell the user, one line per slide, what was created and which template was used; that the deck was
+reviewed and what you fixed; which features were used (charts, questions, interactions); and
+anything that needs their input: problems you could not fix, facts to confirm,
 pictures to replace (list the slides whose sample picture stays), accents to check in a non-English
 deck. Suggest next steps: preview in the player, share, export for an LMS, or restyle with another
 template.
@@ -187,7 +211,7 @@ template.
 | `insertTemplateSlides` says a slide was not found | Take the `slideId` or `tag` from `getTemplateLayouts` of the same template. |
 | The inserted slides look different from the rest | The deck's style and the layouts come from different templates. Switch the style with `insertTemplateSlides {templateId, applyThemeFromTemplate: true}` (no slides) and pass the chosen `templateId` on every insert. |
 | A slide still shows "Click to add title" | A slot was not filled: fill it or `deleteShape` it, then audit again. |
-| Text spills out of its card | Shorten it to the slot's `maxChars`, or move the slide to a variant with a larger budget. |
+| Text spills out of its card | `reviewSlides` names the shape and how far it spills: shorten the text to the slot's `maxChars`, or move the slide to a variant with a larger budget. |
 | Edit landed on the wrong slide | A tool without `slideId` ran after the current slide changed. Pass `slideId` and `shapeId` every time. |
 | "Editor tool execution timed out" | Check the state before retrying so nothing is inserted twice. |
 | Bad argument errors | Read the tool's schema in the tool list and fix the arguments. |

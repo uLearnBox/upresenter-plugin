@@ -67,6 +67,8 @@ Rules that prevent mistakes:
 
 ## 4. Verify and report
 
-After a change read `getPresentationState` for the affected slide and confirm the result. Tell
+After a change run `reviewSlides {slideIds: [the changed slides]}`: new or longer text can spill out
+of its card, and a rewritten text can lose its formulas. Fix what it reports, then read
+`getPresentationState` for the affected slide and confirm the result. Tell
 the user exactly what changed (slide numbers and what was edited) and suggest previewing the
 deck in the player. If part of the request could not be done with the available tools, say so.

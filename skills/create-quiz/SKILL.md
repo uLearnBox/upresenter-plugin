@@ -141,6 +141,7 @@ deck as a quiz.
 
 ## Check
 
-Run `getQuestionsInfo` with `includeAnswers: true`: every graded question has a correct answer,
+Run `reviewSlides` on the question slides: long questions or answers can spill out of their card.
+Then run `getQuestionsInfo` with `includeAnswers: true`: every graded question has a correct answer,
 points add up to the progress `max`, and feedback texts are filled in. Report the quiz structure
 to the user (question types, points, pass mark).

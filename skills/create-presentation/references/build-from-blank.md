@@ -66,8 +66,8 @@ rather than "text on a background".
 - `addList` lays its items out in a row; for a vertical bullet list use a text shape with
   several paragraphs.
 
-After each slide, glance at `getPresentationState` with `scope: "current_slide"` before
-building on it. Layout mistakes compound.
+After each slide, glance at `getPresentationState` with `scope: "current_slide"` and run
+`reviewSlides {slideIds: [the slide]}` before building on it. Layout mistakes compound.
 
 ## 4. Interactivity (optional, when it helps learning)
 

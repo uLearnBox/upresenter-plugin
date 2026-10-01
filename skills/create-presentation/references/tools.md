@@ -33,6 +33,11 @@ when more than one editor tab is open.
 - `attachToPresentation {presentationId}` finds the open editor for a presentation.
 - `getPresentationState {scope}` with scope `selected_shapes | selected_slides | current_slide |
   all_slides | presentation_basic | presentation_full`.
+- `reviewSlides {slideIds?}` shows each slide in the editor, measures how it really renders and
+  returns the problems per slide: `placeholder`, `spillsOutOfBox`, `outsideCard`, `outsideSlide`
+  (with `spillPx`), `overlapsText` (with `otherShapeId`) and `plainMath`; plus `problemSlides` and,
+  when the time budget ran out, `remaining` slide ids to review in another call. It moves the
+  editor's current slide while it works and restores it.
 
 ## Presentation
 
