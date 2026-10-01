@@ -16,7 +16,7 @@
       "interface": {
         "displayName": "uPresenter",
         "shortDescription": "Build interactive lessons",
-        "longDescription": "uPresenter is a web editor for interactive presentations and e-learning lessons. This plugin connects ChatGPT to your uPresenter account so it can list your presentations, create new ones, and build or edit slides for you from a gallery of professionally designed templates: titles and text, lists, timelines, infographics, charts, tables, layouts and styling, plus graded quizzes in 14 question types with scoring and feedback.\n\nEditing happens in the presentation you have open in the uPresenter editor in your browser, so you see every change as it is made and can undo it. You sign in to uPresenter and approve access once; the plugin never sees your password, and you can remove its access at any time under Connected apps in your account settings.\n\nTypical requests: draft a 12-slide lesson on a topic for a grade level, turn your notes into slides, add a 5-question quiz with feedback, restyle a deck, or review and summarize an existing presentation.",
+        "longDescription": "uPresenter is a web editor for interactive presentations and e-learning lessons. This plugin connects ChatGPT to your uPresenter account so it can list your presentations, create new ones, and build or edit slides for you from a gallery of professionally designed templates: titles and text, lists, timelines, infographics, charts, tables, layouts and styling, plus graded quizzes in 14 question types with scoring and feedback.\n\nEditing happens in the presentation you have open in the uPresenter editor in your browser, so you see every change as it is made and can undo it. You sign in to uPresenter and approve access once; the plugin never sees your password, and you can remove its access at any time under Connected apps in your account settings.\n\nTypical requests: draft a 12-slide lesson on a topic for a grade level, turn your notes into slides, add a 5-question quiz with feedback, restyle a deck, translate it to another language, or review it before you present.",
         "developerName": "uLearnBox",
         "category": "Productivity",
         "capabilities": [
@@ -24,6 +24,8 @@
           "Build decks from designed templates",
           "Edit slides, text, layouts and styling",
           "Add graded quizzes and question types",
+          "Translate presentations to other languages",
+          "Review a presentation before you present it",
           "List your presentations"
         ],
         "websiteURL": "https://upresenter.ai",

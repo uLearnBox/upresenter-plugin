@@ -17,8 +17,9 @@ server at `https://mcp.upresenter.ai/mcp`. With it the assistant can:
 - add graded quizzes in 14 question types, with scoring, feedback and results slides;
 - review and summarize an existing presentation.
 
-Three skills teach the assistant how to do this well: `create-presentation`, `create-quiz` and
-`edit-presentation`.
+Five skills teach the assistant how to do this well: `create-presentation`, `create-quiz`,
+`edit-presentation`, `localize-presentation` (translate a deck and adapt it to a locale) and
+`review-presentation` (audit a deck and report what to fix).
 
 ## Install
 

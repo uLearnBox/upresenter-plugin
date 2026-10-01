@@ -1,6 +1,6 @@
 ---
 name: create-quiz
-description: "Add graded quiz questions, knowledge checks, scoring, feedback and results to a uPresenter presentation. Use when the user wants a quiz, test, assessment, survey, review questions or a score-based lesson in uPresenter, in any of its 14 question types."
+description: "Add graded quiz questions, knowledge checks, scoring, feedback and results to a uPresenter presentation. Use when the user wants a quiz, test, assessment, survey, review questions or a score-based lesson in uPresenter, in any of its 14 question types, in any language (for example tạo câu hỏi trắc nghiệm, crear un cuestionario, 做一份测验)."
 ---
 
 # Add quizzes and assessment in uPresenter
@@ -83,6 +83,11 @@ Vary the types across a quiz: for example two multiple-choice, one true-false, o
 one fill-blanks. Check `getSupportedQuestionTypes` if unsure which names exist.
 
 ## Settings that matter
+
+**Write feedback in the deck's language.** New questions carry English feedback texts ("Correct.",
+"Not quite..."). For every question set `correctFeedback`, `incorrectFeedback` (and
+`submittedFeedback` and `answerExplanation` where used) in the language of the deck, whatever it
+was before.
 
 - `mode`: `graded` (counts toward the score) or `survey` (opinion checks, never graded).
 - `points` (1-1000), `maxAttempts` (0 = unlimited), `allowResubmission`.

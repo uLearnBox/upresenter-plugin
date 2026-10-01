@@ -1,6 +1,6 @@
 ---
 name: create-presentation
-description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, using the gallery of designed templates. Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account."
+description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, using the gallery of designed templates. Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account, in any language (for example tạo bài giảng về ..., crear una presentación sobre ..., 做一个关于...的演示文稿)."
 ---
 
 # Create a presentation in uPresenter
@@ -39,7 +39,8 @@ The two rules that make the difference between a designed deck and "text on a ba
 ### 1. Brief
 
 Work out: topic and source material (a document the user pasted, or your own knowledge), audience
-and level, language, purpose (live lecture, self-paced lesson, assessment, pitch, report), the
+and level, language (the deck's language is the language the user writes in, unless they say
+otherwise), purpose (live lecture, self-paced lesson, assessment, pitch, report), the
 length the user asked for, and the mood if they gave one. Infer sensible defaults and ask only what
 would really change the deck. Content accuracy matters more than anything else: if the user gave a
 source, stay faithful to it.
@@ -111,7 +112,10 @@ user has, set the style first, then build.
    template is the chosen one, keep its cover and fill it. Otherwise it belongs to the other
    template: you will insert the chosen template's `title` layout at index 0 and delete the
    starter slide with `deleteSlide`.
-4. Call `setPresentationName` and `setPresentationLanguage` (BCP-47, for example `vi-VN`).
+4. Call `setPresentationName` and `setPresentationLanguage` with the language of the deck, as one of
+   the codes in the `localize-presentation` skill's `references/locales.md` (for example `vi-VN`,
+   `en-US`). The presentation language also sets the player's buttons, the date format and, for
+   Arabic, Hebrew, Persian and Urdu, the text direction.
 
 ### 5. Read the layouts and pick slides
 
@@ -150,6 +154,12 @@ Slide by slide, in order. For every slot of every inserted slide:
   derivation goes into the text as `[[katex:LATEX]]`, for example `Expand [[katex:(a+b)^2]]`. Typing
   `x^2`, `x²` or `1/2` as plain text is wrong. Syntax, where it works and the pitfalls:
   `references/math-formulas.md` (read it before any slide with math).
+- **Language:** write all text in the deck's language, including quiz feedback (the defaults are
+  English, `create-quiz`). Non-English text runs longer than English (Vietnamese, French, German,
+  Spanish and Russian by 10-30%), so shorten rather than overflow; Chinese, Japanese and Korean use
+  about half the characters. When the language uses a script other than Latin, or Vietnamese
+  accents, check in the slide picture that the template's fonts have the letters
+  (`localize-presentation`, `references/locales.md`).
 - Do not touch colors, fonts or sizes. If the layout cannot hold the content, change the layout
   (another variant or tag), not the styling.
 

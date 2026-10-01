@@ -1,6 +1,6 @@
 ---
 name: edit-presentation
-description: "Review, restyle or change an existing uPresenter presentation: fix wording, reorder or add slides, adjust layout and styling, summarize the deck, or undo a change. Use when the user asks to edit, improve, restyle, translate, shorten, summarize or fix a presentation that already exists in their uPresenter account."
+description: "Review, restyle or change an existing uPresenter presentation: fix wording, reorder or add slides, adjust layout and styling, summarize the deck, or undo a change. Use when the user asks to edit, improve, restyle, shorten, summarize or fix a presentation that already exists in their uPresenter account (for example sửa bài giảng, mejorar la presentación, 修改演示文稿). Translation has its own skill, localize-presentation, and a full audit is review-presentation."
 ---
 
 # Edit an existing presentation in uPresenter
@@ -26,7 +26,9 @@ click changes the current slide and later edits can land on the wrong slide.
   within a slide, so always pass `slideId` and `shapeId` together.
 - `getPresentationInfo`, `getPresentationSettings` and `getQuestionsInfo` for settings and quizzes.
 
-For a "summarize" or "review" request, read everything and answer in chat; change nothing.
+For a "summarize" request, read everything and answer in chat; change nothing. For a "review",
+"check" or "is it ready" request use the `review-presentation` skill: it measures and looks at the
+slides, and reports before changing anything.
 
 ## 3. Make the change
 
@@ -42,7 +44,7 @@ For a "summarize" or "review" request, read everything and answer in chat; chang
 | Add a blank slide | `addSlide {slideType: "blank", index}` (always pass `index`), then `add*` tools |
 | Reorder or remove slides | `duplicateSlide`, `deleteSlide`, `goToSlide` |
 | Rename the deck or a slide | `setPresentationName`, `setSlideName`, `setSlideTitle` |
-| Change language | `setPresentationLanguage`, then `setShapeText` for translated texts |
+| Change language | Use the `localize-presentation` skill: it translates every text, quiz answer and feedback, and sets the presentation language that drives the player and text direction |
 | Slide size or layout type | `setSlideSize`, `setLayoutType` (fixed slides or fluid page) |
 
 Layouts inserted from a template follow the deck's theme; the filling rules (every slot, within
