@@ -52,7 +52,9 @@ Contents: 1 Pitch deck, 2 Lesson, 3 Quiz / game show, 4 Brand guidelines, 5 Comp
 13. Assignment or homework: `end`
 
 Build the interactivity for real (questions with scoring), because that is what separates an
-e-learning lesson from a slide deck. Use the `create-quiz` skill for the questions.
+e-learning lesson from a slide deck. Use the `create-quiz` skill for the questions. For math,
+science and other formula-heavy lessons write every expression as a formula (`math-formulas.md`):
+the rule, the worked example and the answer choices all carry formulas.
 
 ## 3. Quiz / game show (12-30 slides)
 1. Cover with the game name: `title` (or `game cover`)

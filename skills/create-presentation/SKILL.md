@@ -78,6 +78,8 @@ should take away), the **layout tag** that carries it, and the **real content** 
   real data: if you have none, use a text layout.
 - Rhythm: a cover first and an `end` last; no two slides with the same tag in a row; a `section`
   divider only in decks of ten or more slides.
+- For math, physics or chemistry content, plan the formulas now: which equation each slide shows,
+  written as LaTeX (`references/math-formulas.md`), one idea and one or two large formulas per slide.
 - Make the content real and specific: concrete numbers, names and examples from the source or
   your knowledge, headlines that state a claim ("Revenue grows 4.5x in three years"), not topic
   labels ("Revenue").
@@ -138,6 +140,10 @@ Slide by slide, in order. For every slot of every inserted slide:
   `setQuestionSettings` (the `create-quiz` skill). Images: keep the template's sample picture, or
   `replaceImage` with a real public HTTPS URL the user gave you; never invent URLs.
 - A slot the content has no use for: `deleteShape`, rather than leaving the prompt visible.
+- **Math is a formula, never plain characters.** Every equation, power, fraction, root, symbol or
+  derivation goes into the text as `[[katex:LATEX]]`, for example `Expand [[katex:(a+b)^2]]`. Typing
+  `x^2`, `x²` or `1/2` as plain text is wrong. Syntax, where it works and the pitfalls:
+  `references/math-formulas.md` (read it before any slide with math).
 - Do not touch colors, fonts or sizes. If the layout cannot hold the content, change the layout
   (another variant or tag), not the styling.
 

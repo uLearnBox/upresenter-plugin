@@ -119,6 +119,9 @@ paragraph. Take `slideId` and `shapeId` from the insert result and pass both.
   unless the user gave you a picture: then `replaceImage {slideId, shapeId, source}` with that
   public HTTPS URL. Never invent image URLs. If a sample picture clashes with the topic, choose a
   variant without image slots and say so in the report.
+- **Math:** write each equation, power or fraction as `[[katex:LATEX]]` inside the text, in any
+  text slot, answer or table cell: it becomes a typeset formula. Never type math as plain characters
+  (`x^2`, `x²`). Details: `math-formulas.md`.
 - **Colors, fonts, sizes:** leave them. They come from the theme. To change the whole look, use
   another template (`applyThemeFromTemplate`), not per-shape styling.
 

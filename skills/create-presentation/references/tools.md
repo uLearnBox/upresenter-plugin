@@ -7,6 +7,10 @@ Common geometry on every `add*` tool: `x, y, width, height, name` (CSS px; x and
 inside freeform containers). Every insert goes into the **current slide**, and into the
 **selected group** if one is selected.
 
+Text arguments (`setShapeText`, `addText`, table cells, choice answers, sequence items, matching
+pairs, sentences of blank questions) accept formulas written as `[[katex:LATEX]]`; see
+`math-formulas.md`. `getPresentationState` lists them as `text.formulas`.
+
 Editing tools take an optional `sessionId` (from `listOpenEditorContexts`); it is only needed
 when more than one editor tab is open.
 

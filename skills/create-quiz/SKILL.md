@@ -48,6 +48,21 @@ For every question slide:
 {"tool": "setQuestionSettings", "args": {"slideId": 3, "shapeId": 7, "mode": "graded", "points": 10, "maxAttempts": 2, "feedback": "correct-incorrect", "correctFeedback": "Exactly!", "incorrectFeedback": "Not quite. Jupiter is the largest.", "answerExplanation": "Jupiter's diameter is about 140,000 km.", "showConfetti": true}}
 ```
 
+## Math in questions and answers
+
+Write equations as formulas, `[[katex:LATEX]]` inside the text (rules and syntax in the
+`create-presentation` skill, `references/math-formulas.md`). They work in the question text (the
+slide's title via `setShapeText`), choice answers, sequence items, matching pairs and the
+`sentence` of fill-blanks, drag-words and multiple-dropdown questions:
+
+```json
+{"tool": "setShapeText", "args": {"slideId": 6, "shapeId": 3, "text": "Which expression equals [[katex:(x+3)^2]]?"}}
+{"tool": "setQuestionAnswers", "args": {"slideId": 6, "shapeId": 8, "answers": [{"text": "[[katex:x^2 + 6x + 9]]", "correct": true}, {"text": "[[katex:x^2 + 9]]", "correct": false}, {"text": "[[katex:x^2 + 3x + 9]]", "correct": false}]}}
+```
+
+Dropdown options and the accepted answers of fill-text-entry questions are plain text only: for
+math there, ask for a number or a short word answer, or use a choice or fill-blanks question.
+
 ## Answer models by type
 
 | questionType | `setQuestionAnswers` payload |

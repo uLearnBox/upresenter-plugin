@@ -51,6 +51,11 @@ The design principles are in the `create-presentation` skill (`references/design
 palette with one accent, background rhythm, large titles, generous margins. Colors and fonts
 come from the theme variables so the whole deck stays consistent.
 
+Math is stored as formulas. `getPresentationState` shows them inside `text.content` as LaTeX
+source and lists them in `text.formulas`; `setShapeText` replaces the whole text, so wrap every
+formula again as `[[katex:LATEX]]` when you rewrite it (`create-presentation`,
+`references/math-formulas.md`), or the formula turns into plain text with raw LaTeX.
+
 Rules that prevent mistakes:
 
 - Tools without a `slideId` act on the **current slide**: call `goToSlide` right before them.

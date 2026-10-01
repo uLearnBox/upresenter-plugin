@@ -52,6 +52,8 @@ rather than "text on a background".
 - **Use theme variables for colors and fonts**: `rgb(var(--aie-accent-0-rgb))` (primary),
   `rgb(var(--aie-accent-2-rgb))`, `rgb(var(--aie-title-rgb))`, `rgb(var(--aie-body-rgb))`,
   `var(--aie-title-font-family)`, so a later theme change restyles the whole deck.
+- **Math is a formula**: write every equation, power or fraction in `addText` / `setShapeText` as
+  `[[katex:LATEX]]`, never as plain characters (`references/math-formulas.md`).
 - **Keep text slide-sized**: titles up to 8 words, bullets up to about 15 words, one idea per
   slide. Put depth into a follow-up slide, a tooltip or dialog.
 - A new blank deck's first slide already holds a title shape (id 1) and an empty body
