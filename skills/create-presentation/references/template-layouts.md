@@ -156,6 +156,8 @@ content`). They differ in composition and budgets. From `getTemplateLayouts` wit
 - **Selecting shapes between calls.** Tools without a `slideId` act on the current slide; always
   pass `slideId` and `shapeId` together.
 - **Skipping the review.** `maxChars` is the template's estimate. Run `reviewSlides` after filling:
-  it measures the real rendering and names any text that spills out of its card or the slide.
+  it measures the real rendering and names any text that spills out of its card or the slide. Then
+  look at the slides with `getSlideImage`: only the picture shows a clumsy layout or a leftover
+  sample.
 - **Counting characters.** Letters, spaces and punctuation all count. Non-English text is often
   longer than English: leave headroom.

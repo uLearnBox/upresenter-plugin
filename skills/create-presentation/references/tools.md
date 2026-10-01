@@ -33,6 +33,10 @@ when more than one editor tab is open.
 - `attachToPresentation {presentationId}` finds the open editor for a presentation.
 - `getPresentationState {scope}` with scope `selected_shapes | selected_slides | current_slide |
   all_slides | presentation_basic | presentation_full`.
+- `getSlideImage {presentationId, slideId | slideIndex}` returns a picture of one slide as the
+  player draws it (a JPEG of the slide, followed by its id, index and size). It shows the saved
+  state and takes a few seconds. `presentationId` comes from `listOpenEditorContexts` or
+  `listPresentations`.
 - `reviewSlides {slideIds?}` shows each slide in the editor, measures how it really renders and
   returns the problems per slide: `placeholder`, `spillsOutOfBox`, `outsideCard`, `outsideSlide`
   (with `spillPx`), `overlapsText` (with `otherShapeId`) and `plainMath`; plus `problemSlides` and,

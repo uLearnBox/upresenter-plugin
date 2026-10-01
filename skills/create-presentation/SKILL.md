@@ -167,9 +167,9 @@ layouts: follow the `create-quiz` skill. For graded e-learning also set `setComp
 
 ### 9. Review the result and fix it
 
-Never report a deck you have not reviewed. `reviewSlides` shows each slide in the editor, measures
-how it really renders and returns the problems per slide; `getPresentationState` and
-`getQuestionsInfo` check the content.
+Never report a deck you have not reviewed. `reviewSlides` measures how each slide really renders
+and returns the problems; `getSlideImage` shows you the slide as a picture; `getPresentationState`
+and `getQuestionsInfo` check the content.
 
 1. `reviewSlides {}` for the whole deck. If the result has `remaining`, call it again with those
    `slideIds`. Each issue has a `kind`, the `shapeId` and, for spills, `spillPx` (how far, in
@@ -185,7 +185,16 @@ how it really renders and returns the problems per slide; `getPresentationState`
 
 2. Fix the issues, then `reviewSlides {slideIds: [the problem slides]}` again. Repeat until the
    slides are clean, at most three rounds. Tell the user about anything you could not fix.
-3. Content checks with `getPresentationState` (`scope: "all_slides"`) and `getQuestionsInfo`:
+3. **Look at the slides.** Measuring cannot judge a design, so call `getSlideImage {presentationId,
+   slideId}` and look at the picture, slide by slide (every slide up to about 15; in a longer deck
+   one slide of each layout plus every slide you changed). The `presentationId` is in
+   `listOpenEditorContexts`. Ask of each picture: is all text readable and fully inside its card;
+   is there enough contrast; do formulas show as typeset math; are there empty areas, crowded
+   areas or clashing pictures; does the slide look like the others; does any leftover sample figure
+   or label remain? Fix what you see and look again. The picture shows the saved state, so look
+   again after your edits. If `getSlideImage` reports it cannot draw the slide, carry on with the
+   measured review and the content checks.
+4. Content checks with `getPresentationState` (`scope: "all_slides"`) and `getQuestionsInfo`:
    - no figure, label, table cell or timeline entry still holds the template's sample (read the
      texts of each slide: dates, percentages and numbers from the sample must match your content);
    - every text fits its `maxChars`; the headline of each slide states its message;
