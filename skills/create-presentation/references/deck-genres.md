@@ -36,7 +36,7 @@ Contents: 1 Pitch deck, 2 Lesson, 3 Quiz / game show, 4 Brand guidelines, 5 Comp
 10. Financials or roadmap: `chart` or `timeline`
 11. The ask and contact: `end` (or `ask`)
 
-## 2. Lesson (15-25 slides)
+## 2. Lesson (12-18 slides)
 1. Cover: lesson title, subject, grade: `title`
 2. Lesson outline (3-4 parts): `overview`
 3. Learning outcomes ("By the end you will be able to..."): `list-3`
@@ -63,10 +63,13 @@ the rule, the worked example and the answer choices all carry formulas.
 4. Round divider ("Round 1: Easy"): `section`
 5. Question, one per slide: `question-mc`, `question-fb`, `question-tf`...
 6. Answer reveal with a fun fact: `title and content`
-7. Repeat 4-6 per round; a scoreboard between rounds: `statistic` or `summary`
+7. Repeat 4-6 per round; a scoreboard between rounds showing the live score (`{{score}}` or
+   `{{$score}}` in a text, an `addProgress` meter), on a game template's scoreboard screen or a
+   `statistic` layout
 8. Final, winner: `end`
 
-Give each round a different difficulty. The app has no countdown timer.
+Give each round a different difficulty. A countdown per question is a slide `timer` with
+`{{$timeLeft}}` on screen; lives, boards and other mechanics are in `games.md`.
 
 ## 4. Brand guidelines (10-14 slides)
 Cover (`title`) · contents (`overview`) · brand story: mission, vision, values (`list-3`) ·

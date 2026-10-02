@@ -5,11 +5,17 @@ if a call is rejected for a bad argument, read that tool's schema and fix the ca
 
 Common geometry on every `add*` tool: `x, y, width, height, name` (CSS px; x and y only matter
 inside freeform containers). Every insert goes into the **current slide**, and into the
-**selected group** if one is selected.
+**selected group** if one is selected; after an insert the new shape is selected. In a deck made
+from a template (freeform) inserts land on top of each other: see `composed-slides.md`.
 
-Text arguments (`setShapeText`, `addText`, table cells, choice answers, sequence items, matching
-pairs, sentences of blank questions) accept formulas written as `[[katex:LATEX]]`; see
-`math-formulas.md`. `getPresentationState` lists them as `text.formulas`.
+**Ids.** Slide and shape ids come from tool results; pass them back as given. Shape ids repeat on
+every slide, so every tool that names a shape takes `slideId` and `shapeId` together.
+
+Formulas written as `[[katex:LATEX]]` work in `setShapeText`, `addText`, table cells, the answers
+of multiple-choice, multiple-response and true-false questions, sequence items, matching pairs and
+the sentences of fill-blanks, drag-words and multiple-dropdown questions; not in dropdown options,
+fill-text-entry answers, chart labels or names. See `math-formulas.md`. `getPresentationState`
+lists them as `text.formulas`.
 
 Editing tools take an optional `sessionId` (from `listOpenEditorContexts`); it is only needed
 when more than one editor tab is open.
@@ -29,11 +35,14 @@ when more than one editor tab is open.
   `templateId`, `name`, `description`, `categories`, `language`, `themeId`, `palette`, `fonts`,
   `slideCount`, `layouts` (slides per layout tag), `previewUrl` (a page that shows every slide)
   and `variableCount` (above zero: a game or quiz-show flow).
+- `query` searches name, description and categories; `category` must equal a gallery category
+  (Business, Education, Game, Quiz, Healthcare, Nonprofit, Design, Marketing, Travel).
 - `getTemplateLayouts {templateId, tag?}` lists a template's slides: `slideId`, `index`, `tag`,
   `name`, `actionCount`, `itemCount`, `hasChart` with `chartShapeId`, `tableShapeId` with `tableRows` and
   `tableColumns`, `hasInfographic` with `entryCount`, `imageSlots`, `questionShapeId` with
-  `questionType`, and `slots` (`shapeId`, `role`, `maxChars`, `minChars`, and either `prompt` for an
-  empty placeholder or `sample` for text that ships in the layout and must be replaced).
+  `questionType` (the `addQuestion` name), and `slots` (`shapeId`, `role`, `maxChars`, `minChars`,
+  and either `prompt` for an empty placeholder or `sample` for text that ships in the layout and
+  must be replaced).
 - `listOpenEditorContexts` lists the presentations open in an editor tab.
 - `attachToPresentation {presentationId}` finds the open editor for a presentation.
 - `getPresentationState {scope}` with scope `selected_shapes | selected_slides | current_slide |
@@ -45,9 +54,13 @@ when more than one editor tab is open.
   `listPresentations`.
 - `reviewSlides {slideIds?}` shows each slide in the editor, measures how it really renders and
   returns the problems per slide: `placeholder`, `spillsOutOfBox`, `outsideCard`, `outsideSlide`
-  (with `spillPx`), `overlapsText` (with `otherShapeId`) and `plainMath`; plus `problemSlides` and,
-  when the time budget ran out, `remaining` slide ids to review in another call. It moves the
-  editor's current slide while it works and restores it.
+  (with `spillPx`), `overlapsText` (with `otherShapeId`) and `plainMath`; plus `problemSlides` and
+  `remaining`, the slides still to review (a deck of more than 40 slides, or the time ran out):
+  pass them as `slideIds` in the next call. It moves the editor's current slide while it works
+  and restores it.
+- `getPresentationInfo` returns name, slide count, theme colors and fonts, `layoutType` (`slide`
+  or `fluid`), `positioningMode`, size, `templateId` (the template the deck was created from) and
+  `themeId` (the theme it wears now; `listTemplates` gives each template's `themeId`).
 
 ## Presentation
 
@@ -73,12 +86,18 @@ when more than one editor tab is open.
   `questionShapeId`, `entryCount` and `imageSlots` where present, and `warnings` (slide size
   differs from the deck, or go-to-slide actions had to be removed). Slots still show their prompt until `setShapeText`
   fills them; `getPresentationState` marks them with `placeholder` and gives `maxChars`.
-- `generateShapeImage {shapeId, prompt, model?, ratio?, style?}` (offered only on some connections)
-  generates a picture into an image slot and spends credits; the result has `creditsRemaining`.
-  Rules for its use: `template-layouts.md`, section 4.
+- `generateShapeImage {slideId, shapeId, prompt, model, ratio, style?}` (offered only on some
+  connections) generates a picture into an image slot and spends credits; the result has the
+  stored image name and `creditsRemaining`. Always pass `model` and `ratio`. Rules for its use:
+  `template-layouts.md`, section 4.
 - `addSlide {slideType: "blank", index}` returns `{slideId, slideIndex}` and focuses the slide
-- `duplicateSlide {}` (current slide), `deleteSlide {slideId}`, `goToSlide {slideId}`
-- `setSlideName {slideId, name}` (outline label), `setSlideTitle {slideId, title}`
+  (without `index`: right after the current slide)
+- `moveSlide {slideId, toIndex}` moves a slide to a position (0-based); its id and links stay
+- `duplicateSlide {}` copies the **current** slide (`goToSlide` first), `deleteSlide {slideId}`,
+  `goToSlide {slideId}`
+- `setSlideName {slideId, name}` (outline label). `setSlideTitle {slideId, title}` replaces the
+  slide's title text with plain text (losing its formatting and formulas) and renames the slide:
+  to change a title use `setShapeText` on its shape instead
 - `setContainerLayout {slideId, shapeId?, layout, gap, alignItems, justifyContent}`
   - layout: `row, column, col-2 ... col-6, ratio-2-1-1, ratio-1-1-2, ratio-1-2, ratio-2-1,
     tiles-2-1, tiles-1-2, tiles-2-1-col, tiles-1-2-col, none`
@@ -113,7 +132,7 @@ when more than one editor tab is open.
 ## Styling
 
 - `setShapeText {slideId, shapeId, text}`: each line break starts a new paragraph
-- `setTextStyle {shapeId, targetType: shape | table | row | column | cell, style}`: keys
+- `setTextStyle {slideId, shapeId, targetType: shape | table | row | column | cell, style}`: keys
   `font-family, font-size, font-weight, font-style, color, text-align, line-height,
   vertical-align, text-decoration-line`
 - `setShapeCSSStyle {slideId, shapeId, style}`: background, border, radius, shadow, padding, flex,
@@ -121,14 +140,15 @@ when more than one editor tab is open.
   and borders, `max-width`) are ignored without an error; use gaps, padding and
   `border-width: "0 0 0 4px"` instead.
 - `setShapePositioningMode {slideId, shapeId, positioningMode: inherit | flow | absolute}`
-- `setShapeInitiallyHidden {shapeId, initiallyHidden}`
+- `setShapeInitiallyHidden {slideId, shapeId, initiallyHidden}`
 - `duplicateShape`, `deleteShape`, `moveShapeForward`, `moveShapeBackward`, `moveShapeToFront`,
-  `moveShapeToBack`, `selectShape`, `selectShapes`, `deselectAll`, `undo`, `redo`
+  `moveShapeToBack`, `selectShape`: all `{slideId, shapeId}` (the slide is shown first);
+  `selectShapes`, `deselectAll`, `undo`, `redo`
 
 Theme variables: `rgb(var(--aie-accent-0-rgb))` (primary) through `--aie-accent-7-rgb`,
 `rgb(var(--aie-title-rgb))`, `rgb(var(--aie-subtitle-rgb))`, `rgb(var(--aie-body-rgb))`,
 `rgb(var(--aie-slide-bg-rgb))`; lightness steps `rgb(var(--aie-accent-2-rgb-l90))` (steps 90, 80,
-70, 60, 40, 30, 20, 10); alpha as `rgba(var(--aie-accent-0-rgb), 0.5)` (never `rgb(var(--x) /
+70, 60, 40, 30, 20, 10; absolute lightness, and there is no l50); alpha as `rgba(var(--aie-accent-0-rgb), 0.5)` (never `rgb(var(--x) /
 0.5)`); fonts `var(--aie-title-font-family)`, `var(--aie-body-font-family)`.
 
 ## Media
@@ -154,10 +174,13 @@ drag-words`.
 
 `setQuestionAnswers {slideId, shapeId, ...}` by type:
 
-- choice types (multiple-choice, multiple-response, true-false, dropdown, fill-text-entry,
-  essay): `answers: [{text, correct}]`
-- slider: `correctValue, min, max, step`; sequence: `items[]` in the correct order
-- matching: `pairs: [{source, target}]`
+- multiple-choice, multiple-response: `answers: [{text, correct}]` (at least 2); true-false:
+  exactly 2 answers
+- dropdown: `answers: [{text, correct}]` (plain text options)
+- fill-text-entry: `answers` = every accepted spelling, all `correct: true` (plain text; matching
+  is case-sensitive unless `caseSensitive: false`); essay: cannot be graded automatically
+- slider: `correctValue, min, max, step`; sequence: `items[]` in the correct order (at least 2)
+- matching: `pairs: [{source, target}]` (2 to 6 pairs)
 - fill-blanks and drag-words: `sentence` with `___` per blank, plus `blanks[]`; drag-words also
   `distractors[]`
 - multiple-dropdown: `sentence` plus `dropdowns: [{correct, alternatives[]}]`
@@ -169,8 +192,9 @@ drag-words`.
 submitted`, `correctFeedback`, `incorrectFeedback`, `submittedFeedback`, `showAnswerKey`,
 `answerExplanation`, `navigation: next-slide | stay`, `navigationDelay` (seconds),
 `showConfetti`, `confettiEffect: basic | fireworks | stars | school-pride | snow | fountain |
-explosion | rain`, `shuffleAnswers`, `caseSensitive`. Read back with `getQuestionsInfo {scope,
-includeAnswers}` and `getQuestionInfo`.
+explosion | rain`, `shuffleAnswers`, `caseSensitive` (new fill-text-entry questions are
+case-sensitive). Read back with `getQuestionsInfo {scope: "all-slides", includeAnswers: true}`
+(without `scope` only the current slide is read; the value has a hyphen) and `getQuestionInfo`.
 
 ## Charts and tables
 
@@ -224,6 +248,9 @@ includeAnswers}` and `getQuestionInfo`.
   `ssn` slide number
 - `setPlayerMode {mode: presentation | quiz | game}`, `setNavigationLock {locked}`,
   `setSlideAutoAdvance {slideId, seconds}` (0 turns it off)
+- `setBackgroundMusic {source, name?, volume?}` (an audio resource or HTTPS URL) loops one track
+  across the deck; it starts muted until an `unmute-media` action (put it first on the Start
+  button); `remove: true` clears it
 - Text can show `{{variable name}}`, `{{$score}}` or `{{$timeLeft}}` in the player.
 
 ## Read-only
@@ -231,3 +258,10 @@ includeAnswers}` and `getQuestionInfo`.
 `getPresentationInfo`, `getPresentationSettings`, `getPresentationBackgrounds`, `getSlideInfo
 {slideIndex}`, `getSlideCSSStyle`, `getShapeCSSStyle`, `getSupportedQuestionTypes`,
 `getSupportedChartTypes`, `getQuestionsInfo`, `getChartInfo`, `getTablesInfo`.
+
+## Not available through the tools
+
+Entrance and exit animations, slide transitions, narration or text-to-speech, music generation,
+custom themes (own colors and fonts) and exporting (SCORM, PDF, video). Templates bring their own
+animations and transitions with their layouts. Tell the user when a request needs one of these:
+they can do it in the editor.

@@ -39,7 +39,8 @@ version, ask them to duplicate the presentation in their dashboard first and ope
 ### 2. Read everything
 
 `getPresentationState {scope: "all_slides"}` for every text (with its shape id, and `formulas` where
-a text holds math), `getQuestionsInfo {includeAnswers: true}`, `getChartInfo` for each chart and
+a text holds math), `getQuestionsInfo {scope: "all-slides", includeAnswers: true}` (without
+`scope` only the current slide is read), `getChartInfo` for each chart and
 `getTablesInfo` for tables. Make a list of what needs translating: texts, list items, buttons,
 table cells, chart labels, slide names, the presentation name, quiz questions, answers, feedback and
 answer explanations.
@@ -72,7 +73,9 @@ For each slide, in order:
 - Charts: `setChartText {slideId, shapeId, title, labels, datasetLabels, xAxisName, yAxisName}` keeps
   the numbers and changes only the words, in the same order and count.
 - Tables: `setTableCellsText`.
-- Slide names and titles: `setSlideName`, `setSlideTitle`; the deck: `setPresentationName`.
+- Slide titles are text shapes: translate them with `setShapeText` like any text. Slide names
+  (the outline labels): `setSlideName`; the deck: `setPresentationName`. Do not use
+  `setSlideTitle`: it replaces the title with plain text, losing its formatting and formulas.
 - Leave variables, interactions and `{{score}}`-style placeholders as they are.
 
 ### 5. Translate the quiz
@@ -82,8 +85,8 @@ For each slide, in order:
   Sequence items keep their correct order, matching pairs keep their pairing, and blanks keep their
   positions.
 - Text-entry questions: list every accepted spelling, and in languages with accents also the form
-  without accents (a learner may type `Ha Noi` for `Hà Nội`); `caseSensitive` stays off unless the
-  case matters.
+  without accents (a learner may type `Ha Noi` for `Hà Nội`). New text-entry questions are
+  case-sensitive: set `setQuestionSettings {caseSensitive: false}` unless the case matters.
 - **Feedback defaults to English.** `setQuestionSettings` with `correctFeedback`, `incorrectFeedback`,
   `submittedFeedback` and `answerExplanation` written in the target language for **every** question,
   even if the deck was English before.
@@ -97,11 +100,13 @@ narration, embedded videos and documents. List the slides where they are.
 
 Translated text is the usual cause of overflow.
 
-1. `reviewSlides {}`: fix every spill by shortening the translation, not by shrinking the font.
+1. `reviewSlides {}` (up to 40 slides per call; call again with `remaining`): fix every spill by
+   shortening the translation, not by shrinking the font.
 2. `getSlideImage {presentationId, slideId}` for each slide: check that every letter and accent
    renders in the intended font (a fallback font or empty boxes mean the font lacks the script),
    that nothing is cut, and for right-to-left decks that the layout reads naturally mirrored.
-3. `getQuestionsInfo {includeAnswers: true}`: every graded question still has its correct answer and
+3. `getQuestionsInfo {scope: "all-slides", includeAnswers: true}`: every graded question still has
+   its correct answer and
    the feedback is in the new language.
 
 If a font lacks the script, tell the user and propose another template whose fonts cover it

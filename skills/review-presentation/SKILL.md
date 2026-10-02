@@ -21,12 +21,15 @@ time, and pass `slideId` and `shapeId` together.
   size, slide count, theme colors and fonts, positioning mode.
 - `getPresentationState {scope: "all_slides"}`: every text, its slide and shape, `placeholder`,
   `maxChars`, `formulas`.
-- `getQuestionsInfo {includeAnswers: true}`, `getPresentationSettings`.
+- `getQuestionsInfo {scope: "all-slides", includeAnswers: true}` (without `scope` only the current
+  slide is read), `getPresentationSettings`.
+- `getInteractions {slideId}` and `getVariables` on interactive slides and games.
 - `getChartInfo` and `getTablesInfo` where a slide has them.
 
 ### 2. Measure
 
-`reviewSlides {}`; if the result has `remaining`, call it again with those `slideIds`. It reports
+`reviewSlides {}` reviews up to 40 slides per call; while the result has `remaining`, call it again
+with those `slideIds`. It reports
 text spilling out of its box, card or the slide, text lying on other text, unfilled placeholders and
 math typed as plain characters.
 
@@ -77,6 +80,19 @@ wrong and the fix.
 - Question types are varied; answers are unambiguous; the total points match the intent.
 - For graded e-learning: completion and success criteria are set, and the player settings match the
   purpose (navigation free for a lecture, locked or limited for an assessment).
+- Fill-in answers are not case-sensitive unless the case matters; text-entry answers list the
+  spellings learners will type.
+
+**Interactions and games** (`getInteractions`, `getVariables`)
+- Every button does something; every go-to-slide target exists; reveal targets start hidden.
+- Game questions use `navigation: "stay"`; navigation is not placed on both `question-answered` and
+  `question-correct`; a Play again button resets the variables; a game has a Start button that
+  unmutes media first when it has music.
+- Nothing essential is shown only on hover (phones have no hover).
+
+**Accessibility**
+- Text contrast is strong on every background, body text is large enough, and no meaning depends on
+  color alone.
 
 ### 5. Report
 
@@ -86,7 +102,8 @@ Give the user:
 2. The findings, most important first, in three groups: **fix before presenting** (errors, spills,
    wrong answers, leftover sample text), **should improve** (clarity, consistency, readability) and
    **nice to have**. Each finding: slide number, what, and the fix. Keep it a short table or list.
-3. What you could not check (no slide pictures, audio and video content, text inside images).
+3. What you could not check (no slide pictures, audio and video content, text inside images,
+   animations and transitions, and how interactions and games behave when played).
 4. A question: which fixes should be made now. Offer to make all the "fix before presenting" ones.
 
 ### 6. After the user chooses

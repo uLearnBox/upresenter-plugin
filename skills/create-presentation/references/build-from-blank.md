@@ -1,8 +1,10 @@
 # Building a deck from blank slides
 
-The fallback when no template fits (`listTemplates` returned nothing suitable) or when the user
-asks for a deck with no template. A deck built from a template looks more designed and is
-faster, so try `listTemplates` first (see `SKILL.md`). The interactivity and player settings in
+The fallback when no template fits (`listTemplates` returned nothing suitable, and no nearby
+style in `styles.md` will do) or when the user asks for a deck with no template. A deck built
+from a template looks more designed and is faster, so try `listTemplates` first (see
+`SKILL.md`). To add a single slide to a template deck, use `composed-slides.md` instead: a
+template deck is freeform and needs its skeleton. The interactivity and player settings in
 sections 4 and 5 also apply to decks built from templates.
 
 ## 1. Plan the deck
@@ -39,16 +41,19 @@ rather than "text on a background".
 `addSlide` with `slideType: "blank"`, then `add*` tools, using `addGroupLayout` and
 `setContainerLayout` for structure. Rules that prevent the common failures:
 
-- **Always pass `index` to `addSlide`.** Without it the slide can land before the current one.
+- **Pass `index` to `addSlide`** so the order is the one you planned (without it the slide goes
+  right after the current one).
 - **Inserts go into the current slide and into the selected group.** `addSlide` focuses the new
-  slide; use `goToSlide` to return to a slide. After `addGroupLayout` the group is selected, so
-  the next insert lands inside it. To fill a specific column call `selectShape <column id>`
-  right before each insert and check `parentShapeId` in the result; `deselectAll` returns to the
-  slide root. `addTable` always goes to the slide root.
-- **Ids are numbers unique only within one slide.** Always carry `slideId` and `shapeId`
-  together and take them from tool results; never guess.
-- **Tools without a `slideId` act on the current slide** (`setTextStyle`, `addChart`,
-  `setChartText`, every insert). Call `goToSlide` right before them.
+  slide; use `goToSlide` to return to a slide. After `addGroupLayout` the group is selected for
+  the **first** insert only: the new shape is selected afterwards. So call `selectShape {slideId,
+  shapeId: <group or column id>}` right before **each** insert into it. Text, button, icon, image
+  and media inserts return `parentShapeId` to check; for lists, charts, questions and
+  infographics check with `getPresentationState`. `deselectAll` returns to the slide root.
+  `addTable` always goes to the slide root.
+- **Shape ids repeat on every slide.** Always carry `slideId` and `shapeId` together and take
+  them from tool results; never guess.
+- **Inserts and a few chart tools act on the current slide** (`addChart`, `setChartText` without
+  ids, every `add*`). Call `goToSlide` right before them.
 - **Use theme variables for colors and fonts**: `rgb(var(--aie-accent-0-rgb))` (primary),
   `rgb(var(--aie-accent-2-rgb))`, `rgb(var(--aie-title-rgb))`, `rgb(var(--aie-body-rgb))`,
   `var(--aie-title-font-family)`, so a later theme change restyles the whole deck.
@@ -60,8 +65,8 @@ rather than "text on a background".
   placeholder (id 2). Fill them with `setShapeText` instead of adding duplicates.
 - Charts: size them afterwards with `setShapeCSSStyle` (`width`, `height`); `addChart` stores
   640 x 360 regardless of the parameters. Tables take `csv` or `data`.
-- Images: use `addImage` with a public HTTPS `source`, or `addImagePlaceholder` when the user
-  will add the picture. Do not invent image URLs; if you do not have a real, relevant one, use a
+- Images: use `addImage` with a public HTTPS `source` (and `objectFit: "cover"` to fill its box),
+  or `addImagePlaceholder` when the user will add the picture. Do not invent image URLs; if you do not have a real, relevant one, use a
   placeholder, an icon or an `addSvg` drawing and tell the user.
 - `addList` lays its items out in a row; for a vertical bullet list use a text shape with
   several paragraphs.
@@ -71,10 +76,10 @@ After each slide, glance at `getPresentationState` with `scope: "current_slide"`
 
 ## 4. Interactivity (optional, when it helps learning)
 
-- Reveal: create the shape, `setShapeInitiallyHidden`, then a button with
-  `addInteraction` (`eventType: "click"`, `actionType: "show"`, `actionData.targetShapeId`).
-  A show/hide action cannot target the shape it is attached to; put the button in a group and
-  target the group.
+- Reveal: create the shape, `setShapeInitiallyHidden {slideId, shapeId, initiallyHidden: true}`,
+  then a button with `addInteraction` (`eventType: "click"`, `actionType: "show"`,
+  `actionData.targetShapeId`). A show/hide action cannot target the shape it is attached to; put
+  the shape in a group and target the group. More recipes: `interactions.md`; games: `games.md`.
 - Score and branching: `createVariable`, then `addInteraction` with `adjust-variable` and
   `go-to-slide` plus a `condition`. Operands are typed objects: `{"kind":"literal","value":10}`,
   never a bare number. Details in `references/tools.md`.

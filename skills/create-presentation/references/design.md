@@ -34,12 +34,16 @@ text, because the theme text colors are tuned for the base background.
 ## Layout skeletons
 
 `A` is `rgb(var(--aie-accent-0-rgb))`. Before every insert into a column call
-`selectShape <column id>` and check `parentShapeId` in the result.
+`selectShape {slideId, shapeId: <column id>}`: text, button, icon, image and media inserts return
+`parentShapeId`, which must be that column; check other inserts with `getPresentationState`. In a
+deck made from a template (freeform) build these skeletons inside the positioned group of
+`composed-slides.md`, section 2, which also has many more compositions than the ones below.
 
 **Cover, split text | picture**: `setSlideCSSStyle {padding: "0px"}`, `setContainerLayout
 {layout: "col-2", gap: "0px", alignItems: "stretch"}`; a column group with an eyebrow line, the
 title (72-90 px), `addDivider {thickness: 3, color: A}` and a subtitle; the second column holds
-`addImage` (`width: 100%`, `height: 100%`, `object-fit: cover`) or a placeholder.
+`addImage {source, objectFit: "cover"}` sized with `setShapeCSSStyle {width: "100%", height:
+"100%"}`, or `addImagePlaceholder`.
 
 **Agenda, numbered grid**: slide `padding: 72px`, layout `column`, `justifyContent: center`; a
 title, a one-line description and an accent divider; `addGroupLayout {layout: "col-2",
@@ -78,9 +82,13 @@ Notes that apply everywhere:
 - Set line height with `setTextStyle {style: {"line-height": "1.25"}}`; very large numerals
   need at least 1.2 or they clip.
 
+- Icons take their size from `font-size` (`setShapeCSSStyle`); `addShape` draws a `box-shadow`
+  around its whole box, not its outline.
+
 ## Check before reporting
 
-For each slide (`getPresentationState` with `scope: "current_slide"`): does it share the deck's
-palette, fonts and margins? Is there one focal point? Is text readable on inverse and accent
-slides? Is anything empty, clipped or stuck to the top? Charts: are series distinguishable and
-is the title set? Fix what you find and report remaining compromises honestly.
+Look at each slide with `getSlideImage` (the picture shows what the data cannot): does it share
+the deck's palette, fonts and margins? Is there one focal point? Is text readable on inverse and
+accent slides? Is anything empty, clipped or stuck to the top? Charts: are series
+distinguishable, is the title set, are labels readable on a dark slide? Run `reviewSlides` for
+spills and overlaps. Fix what you find and report remaining compromises honestly.

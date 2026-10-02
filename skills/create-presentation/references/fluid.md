@@ -16,7 +16,7 @@ fixed 16:9 compositions, stay as they are, so the result is a slide deck in disg
 presentations are built from **fluid templates**.
 
 Contents: 1 Finding a fluid template, 2 Creating the presentation, 3 Planning cards, 4 Filling
-cards, 5 What not to do, 6 Review
+cards, 5 Composing a card, 6 What not to do, 7 Review
 
 ## 1. Finding a fluid template
 
@@ -30,11 +30,20 @@ slide templates.
 
 If none fits the topic, the closest document-like one (a report or a handbook) still serves most
 subjects: its layouts are generic cards, and you fill them with your own content. Tell the user
-this is a choice from a small set. If they want a look the templates do not have, they can create
-a blank fluid presentation themselves (Create Blank, Fluid Layout, pick one of the themes). Then
-insert the cards of the closest fluid template into it **without** `applyThemeFromTemplate`: the
-cards take the deck's own theme. Do not build fluid cards from blank shapes (`build-from-blank.md`
-is for slides).
+this is a choice from a small set. For a different look there are two routes:
+
+- **Borrow a style.** Build from a fluid template, then switch the deck's colors and fonts to the
+  style the topic calls for: `insertTemplateSlides {templateId: <a template in that style, slide
+  or fluid>, applyThemeFromTemplate: true}` with no slides (`styles.md` finds the style). The
+  cards follow the theme. Slide themes are not tuned for cards: look at the cards afterwards, and
+  set a quiet page background around them with `setPresentationBackground` if the theme's is
+  harsh.
+- **The user's own theme.** They create a blank fluid presentation themselves (Create Blank, Fluid
+  Layout, pick one of the themes). Then insert the cards of the closest fluid template into it
+  **without** `applyThemeFromTemplate`: the cards take the deck's own theme.
+
+Do not build a whole fluid deck from blank shapes (`build-from-blank.md` is for slides); for the
+odd card the libraries lack, compose it (section 5).
 
 ## 2. Creating the presentation
 
@@ -67,10 +76,30 @@ Everything about slots works as for slides (`template-layouts.md`): fill every s
   make sense on its own.
 - Pictures are usually wide banners at the top of a card or beside the text. A sample picture
   stays unless the user gives you one (`replaceImage`) or the connection offers
-  `generateShapeImage` (a landscape ratio such as 16:9 or 3:2 for banners).
+  `generateShapeImage` (ratio `16:9` for banners, `4:3` beside text).
 - One question per card for quizzes (`create-quiz`).
 
-## 5. What not to do
+## 5. Composing a card
+
+For a card no layout carries (a reveal activity, a media card, a results card): `addSlide
+{slideType: "blank", index}`, then build it in flow, with these rules that keep it readable on a
+phone:
+
+- one `addGroupLayout {layout: "column", gap: 24}` holding the card, and `selectShape {slideId,
+  shapeId: group}` before each insert (`composed-slides.md`, section 2, without the positioning:
+  a fluid card is already a flow container);
+- card padding at most 48 px and group padding at most 32 px (padding is not reduced on phones);
+  gaps 16-32 px;
+- text at a reading width: the card column (`setFluidMaxWidth`, 960-1100 px) or a `col-2` /
+  `ratio-2-1` column, about 75 characters per line at most;
+- a banner picture with `objectFit: "cover"` and a fixed height of 320-420 px; a side picture in a
+  `col-2` with an explicit height. On a phone every `col-N`, `ratio-*` and `row` stacks into one
+  column, so order the blocks so the stacked order still reads well (heading before its picture,
+  numbers before their text);
+- reveals and answers stay inside the same card;
+- dividers and accent bars short and start-aligned.
+
+## 6. What not to do
 
 - No x/y placement, no `setShapePositioningMode` absolute, no fixed pixel widths on text: they do
   not reflow on a phone.
@@ -79,10 +108,11 @@ Everything about slots works as for slides (`template-layouts.md`): fill every s
   card.
 - Do not stack many tiny blocks in a row: on a phone every `col-N` group becomes one column.
 
-## 6. Review
+## 7. Review
 
-`reviewSlides` works on cards: it reports unfilled placeholders, overlaps and plain-character math.
-It cannot report a text spilling out, because a card grows with its content. `getSlideImage` draws
+`reviewSlides` works on cards: it reports unfilled placeholders, overlaps, plain-character math and
+text spilling out of its own box or an inner card. Nothing runs past the edge of the card itself,
+because a card grows with its content. `getSlideImage` draws
 **one whole card** at desktop width, as tall as the card, so look at every card. You cannot see the
 phone layout: say so in the report, and note that the layouts are built to stack on narrow screens
 as long as they stay in flow.

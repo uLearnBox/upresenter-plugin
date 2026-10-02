@@ -6,9 +6,10 @@ description: "Add graded quiz questions, knowledge checks, scoring, feedback and
 # Add quizzes and assessment in uPresenter
 
 Questions are native objects of the presentation, graded by the player and tracked for LMS
-reporting. This skill assumes a presentation is open in an editor tab. If not, follow step 2 of
+reporting. This skill assumes a presentation is open in an editor tab. If not, follow step 4 of
 the `create-presentation` skill first (`listOpenEditorContexts`, then `listPresentations` or
-`getNewPresentationLink`). Call tools one at a time and use the ids they return.
+`getNewPresentationLink`). Call tools one at a time, use the ids they return, and pass `slideId`
+with every `shapeId` (shape ids repeat on every slide).
 
 ## Question workflow
 
@@ -20,27 +21,36 @@ Every template has designed question slides tagged `question-mc`, `question-mr`,
 keeps the quiz in the same visual style as the rest of the deck. `getTemplateLayouts {templateId,
 tag: "question-mc"}` shows which exist and the variants of each.
 
-1. `insertTemplateSlides {slides: [{tag: "question-mc"}, ...], index}` places the question slides
-   at exact positions. The result gives each slide's `slideId`, its `slots` and the
-   `questionShapeId`.
-2. `setShapeText` the question into the `title` slot, and a short instruction for the type
-   ("Select one answer", "Put the steps in order") into the other slot, or `deleteShape` it.
-3. `setQuestionAnswers {slideId, shapeId: questionShapeId, ...}` with the answer model of that
-   type (below); the layout adapts to the number of answers.
-4. `setQuestionSettings` for grading, feedback and navigation.
+1. Find the template the deck's style comes from: `getPresentationInfo` gives `themeId`; the
+   template is the one whose `themeId` matches in `listTemplates` (usually the deck's own
+   `templateId`, but not after the style was switched). Pass that `templateId` on every insert:
+   without it the tool uses the template the deck was created from, which may be another style.
+2. `insertTemplateSlides {templateId, slides: [{tag: "question-mc"}, ...], index}` places the
+   question slides at exact positions. The result gives each slide's `slideId`, its `slots`, the
+   `questionShapeId` and `questionType`.
+3. `setShapeText` the question into the `title` slot, and a short instruction for the type
+   ("Select one answer", "Put the steps in order") into the other slot, or `deleteShape {slideId,
+   shapeId}` it.
+4. `setQuestionAnswers {slideId, shapeId: questionShapeId, ...}` with the answer model of that
+   type (below). The answers keep the layout's designed answer cards; extra answers copy the last
+   card. More answers than the layout shows can overflow: check the slide picture.
+5. `setQuestionSettings` for grading, feedback and navigation.
 
-A type the template has no layout for falls back to the blank-slide route below, or to another
-template question style. Follow the `create-presentation` skill for choosing the template.
+A type the template has no layout for falls back to the blank-slide route below. Follow the
+`create-presentation` skill for choosing the template.
 
 ### On blank slides
 
 For every question slide:
 
 1. `addSlide {slideType: "blank", index}` (always pass `index`).
-2. `addText` with `textType: "title"` holding the question text.
-3. `addQuestion {questionType, answers}` returns the question `shapeId`.
-4. `setQuestionAnswers` with the answer model of that type.
-5. `setQuestionSettings` for grading, feedback and navigation.
+2. In a deck made from a template (freeform), first the positioned content group of
+   `create-presentation` `references/composed-slides.md`, section 2, and `selectShape` it before
+   each insert; otherwise the title and the question land on top of each other.
+3. `addText` with `textType: "title"` holding the question text.
+4. `addQuestion {questionType, answers}` returns the question `shapeId`.
+5. `setQuestionAnswers` with the answer model of that type.
+6. `setQuestionSettings` for grading, feedback and navigation.
 
 ```json
 {"tool": "addQuestion", "args": {"questionType": "multiple-choice", "answers": ["Jupiter", "Saturn", "Earth"]}}
@@ -67,12 +77,14 @@ math there, ask for a number or a short word answer, or use a choice or fill-bla
 
 | questionType | `setQuestionAnswers` payload |
 |---|---|
-| multiple-choice, multiple-response, true-false, dropdown | `answers: [{text, correct}]` (one `correct` for multiple-choice, several for multiple-response) |
-| fill-text-entry (short answer) | `answers`: every accepted spelling, all `correct: true` |
+| multiple-choice, multiple-response | `answers: [{text, correct}]`, at least 2 (one `correct` for multiple-choice, several for multiple-response) |
+| true-false | exactly 2 `answers: [{text, correct}]`, in the deck's language |
+| dropdown | `answers: [{text, correct}]` (plain text) |
+| fill-text-entry (short answer) | `answers`: every accepted spelling, all `correct: true`; matching is case-sensitive until `caseSensitive: false` |
 | essay | cannot be auto-graded: use `mode: "survey"` or `feedback: "submitted"` |
 | slider | `correctValue, min, max, step` |
-| sequence | `items: [...]` in the correct order (the player shuffles them) |
-| matching | `pairs: [{source, target}]` |
+| sequence | `items: [...]` in the correct order, at least 2 (the player shuffles them) |
+| matching | `pairs: [{source, target}]`, 2 to 6 pairs |
 | fill-blanks | `sentence` with `___` per blank, `blanks: [...]` |
 | drag-words | as fill-blanks plus `distractors: [...]` |
 | multiple-dropdown | `sentence` plus `dropdowns: [{correct, alternatives: [...]}]` |
@@ -96,8 +108,9 @@ was before.
 - `navigation`: questions advance to the next slide after submit by default. If the slide has
   its own Next button, set `navigation: "stay"` or one click will skip a slide.
 - `showConfetti` with `confettiEffect`: `basic, fireworks, stars, school-pride, snow, fountain,
-  explosion, rain`; `shuffleAnswers` for multiple-choice and multiple-response; `caseSensitive`
-  for fill-text-entry.
+  explosion, rain`; `shuffleAnswers` for multiple-choice and multiple-response;
+  `caseSensitive` for fill-text-entry: new questions are case-sensitive, so set it to `false`
+  unless the case matters ("hà nội" should match "Hà Nội").
 
 Read the result back with `getQuestionsInfo {scope: "all-slides", includeAnswers: true}`.
 
@@ -127,6 +140,10 @@ A review slide should end with a button back to the questions.
 
 ## Results slide
 
+Templates rarely have a results layout: compose it (in a template deck inside the positioned
+group of `create-presentation` `references/composed-slides.md`). Games with lives, timers and
+boards: `create-presentation` `references/games.md`.
+
 - Title text, then `addProgress {variant: "circle", min: 0, max: <total points>, variableId,
   progressColor: "rgb(var(--aie-accent-0-rgb))", trackColor: "rgba(var(--aie-body-rgb), 0.2)"}`.
   The circle shows no number: add a text such as `Score: {{score}}`.
@@ -147,6 +164,9 @@ deck as a quiz.
 ## Check
 
 Run `reviewSlides` on the question slides: long questions or answers can spill out of their card.
-Then run `getQuestionsInfo` with `includeAnswers: true`: every graded question has a correct answer,
-points add up to the progress `max`, and feedback texts are filled in. Report the quiz structure
+Then run `getQuestionsInfo {scope: "all-slides", includeAnswers: true}` (without `scope` it reads
+only the current slide): every graded question has a correct answer, points add up to the
+progress `max`, and feedback texts are in the deck's language. Check the score and branching
+wiring with `getInteractions {slideId}`; the tools cannot play the quiz, so ask the user to try
+it in the player. Report the quiz structure
 to the user (question types, points, pass mark).
