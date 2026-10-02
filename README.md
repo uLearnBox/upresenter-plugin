@@ -11,7 +11,8 @@ server at `https://mcp.upresenter.ai/mcp`. With it the assistant can:
 - list your presentations and give you a link to open or create one;
 - browse the template gallery and build a deck from a template: it picks a design that fits your
   topic, inserts only the layouts your content needs and fills them with real content, so the
-  result looks as designed as the template itself;
+  result looks as designed as the template itself. It builds both kinds of presentation: fixed
+  slides, and fluid ones (a scrolling, responsive document of cards) from the fluid templates;
 - create and edit slides in the presentation you have open in the uPresenter editor: text,
   lists, timelines, infographics, charts, tables, layouts, styling and interactions;
 - add graded quizzes in 14 question types, with scoring, feedback and results slides;

@@ -25,6 +25,9 @@ click changes the current slide and later edits can land on the wrong slide.
   `"current_slide"` for detail. Take slide and shape ids from the result; ids are unique only
   within a slide, so always pass `slideId` and `shapeId` together.
 - `getPresentationInfo`, `getPresentationSettings` and `getQuestionsInfo` for settings and quizzes.
+  `getPresentationInfo` also says whether the deck is `slide` or `fluid` (a scrolling document of
+  cards, see `create-presentation`, `references/fluid.md`): in a fluid deck keep to flow layout, do
+  not place shapes by x/y, and add cards from fluid templates only.
 
 For a "summarize" request, read everything and answer in chat; change nothing. For a "review",
 "check" or "is it ready" request use the `review-presentation` skill: it measures and looks at the
@@ -45,7 +48,8 @@ slides, and reports before changing anything.
 | Reorder or remove slides | `duplicateSlide`, `deleteSlide`, `goToSlide` |
 | Rename the deck or a slide | `setPresentationName`, `setSlideName`, `setSlideTitle` |
 | Change language | Use the `localize-presentation` skill: it translates every text, quiz answer and feedback, and sets the presentation language that drives the player and text direction |
-| Slide size or layout type | `setSlideSize`, `setLayoutType` (fixed slides or fluid page) |
+| Slide size | `setSlideSize` (fixed slides only; a fluid presentation has no slide size, its card width is `setFluidMaxWidth`) |
+| Slides to fluid, or fluid to slides | Not a setting: the layouts of the two kinds differ, and `setLayoutType` alone leaves a slide deck under another name. Build a new presentation of the other kind from a template of that kind (`create-presentation`, `references/fluid.md`), and move the content over |
 
 Layouts inserted from a template follow the deck's theme; the filling rules (every slot, within
 `maxChars`, no sample text left) are in `create-presentation` `references/template-layouts.md`.

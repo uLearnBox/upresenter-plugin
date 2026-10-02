@@ -35,7 +35,10 @@ math typed as plain characters.
 `getSlideImage {presentationId, slideId}` for each slide (up to about 15 slides; in a longer deck one
 slide of each layout plus every slide the measurement flagged). `presentationId` comes from
 `listOpenEditorContexts`. If the tool cannot draw slides, say so in the report and review from the
-measurements and the content alone.
+measurements and the content alone. In a **fluid** presentation (`getPresentationInfo` says
+`layoutType: "fluid"`) the "slides" are cards that grow with their content, so nothing spills
+and each picture is one whole card, as tall as it is; judge reading length per card (about two
+screens at most), the order of the sections and the look. You cannot see the phone layout: say so.
 
 ### 4. Judge
 

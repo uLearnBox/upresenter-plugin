@@ -10,6 +10,10 @@ restyle it.
 Contents: 1 Finding and reading a template, 2 Layout tags, 3 Slots and budgets, 4 Filling each
 kind of content, 5 Choosing between variants, 6 Pitfalls, 7 Game and quiz-show templates
 
+Everything here is about **slide** templates (the default). A **fluid** presentation (scrolling
+cards) has its own templates, listed with `layoutType: "fluid"`: see `fluid.md`. The tags and slots
+work the same way, but fluid slots have no `maxChars`.
+
 ## 1. Finding and reading a template
 
 `listTemplates` returns up to `limit` templates (default 20, at most 50), sorted by name, and

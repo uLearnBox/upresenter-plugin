@@ -1,6 +1,6 @@
 ---
 name: create-presentation
-description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, using the gallery of designed templates. Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account, in any language (for example tạo bài giảng về ..., crear una presentación sobre ..., 做一个关于...的演示文稿)."
+description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, using the gallery of designed templates. Builds both kinds of presentation: fixed slides, and fluid ones (a scrolling, responsive document of cards). Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account, in any language (for example tạo bài giảng về ..., tạo presentation fluid về ..., crear una presentación sobre ..., 做一个关于...的演示文稿)."
 ---
 
 # Create a presentation in uPresenter
@@ -45,6 +45,17 @@ length the user asked for, and the mood if they gave one. Infer sensible default
 would really change the deck. Content accuracy matters more than anything else: if the user gave a
 source, stay faithful to it.
 
+**Decide the kind of presentation from the words of the request.** uPresenter has two kinds and
+they are built differently: **slides** (fixed 16:9 pages, the default) and **fluid** (a scrolling,
+responsive document made of cards, for phones and reading). If the user asks for a fluid
+presentation (fluid, scrolling, responsive, mobile-first, document-like, "dạng cuộn", "kiểu
+fluid", in any language), **it is a fluid presentation: read `references/fluid.md` now and follow
+it where this file differs**. The differences are: `listTemplates {layoutType: "fluid"}` in step
+2, a link that creates a fluid deck in step 4, cards instead of slides in step 3, no `maxChars`.
+Never take a slide template and switch it with `setLayoutType`: that leaves a fixed slide deck
+under a different name, which is exactly what the user did not ask for. When the request does not
+say, build slides.
+
 ### 2. Choose the design language: pick a template
 
 Every template is one **design language**: a theme (colors and fonts, what the Design tab
@@ -52,7 +63,8 @@ holds) plus a library of layouts drawn in that style ("Swiss Editorial", "Duoton
 "Warm Classroom"...). Choosing the language comes first, before any slide exists.
 
 1. `listTemplates` with a `query` or `category` that matches the genre or mood ("pitch", "lesson",
-   "report", "quiz", "dark"). The gallery has about forty templates and a call shows 20 at most:
+   "report", "quiz", "dark"). (It lists slide templates; add `layoutType: "fluid"` for a fluid
+   presentation, `references/fluid.md`.) The gallery has about forty templates and a call shows 20 at most:
    compare `total` with what came back and narrow the search rather than judging from the first
    page. Read each result's `description`, `categories`, `layouts` (tag counts), `language`,
    `palette` and `fonts`. The tags the plan needs must exist in the template: a `timeline`, a
@@ -102,10 +114,12 @@ user has, set the style first, then build.
 
 1. `listOpenEditorContexts`. If the user has a deck open, use it. If none is open,
    `getNewPresentationLink` with the `templateId` of the chosen template gives the user a link:
-   opening it **creates a presentation from the template** and opens it in the editor. Ask them to
+   opening it **creates a presentation from the template** (a fluid one for a fluid template) and
+   opens it in the editor. Ask them to
    keep that tab open, then call `listOpenEditorContexts` again. If several editors are open, pass
    the `sessionId` of the right one to every editing tool.
-2. `getPresentationInfo` shows the deck's `templateId`. If it is **not** the template you chose,
+2. `getPresentationInfo` shows the deck's `layoutType` (`slide` or `fluid`, which must be what the
+   request asked for) and its `templateId`. If it is **not** the template you chose,
    switch the deck's style: `insertTemplateSlides {templateId: <chosen>, applyThemeFromTemplate:
    true}` with no `slides` changes only the theme (colors and fonts of every slide), like picking a
    theme in the Design tab. Do it before building, so everything that follows already has the
@@ -186,6 +200,10 @@ Never report a deck you have not reviewed. `reviewSlides` measures how each slid
 and returns the problems; `getSlideImage` shows you the slide as a picture; `getPresentationState`
 and `getQuestionsInfo` check the content.
 
+In a fluid presentation the "slides" are cards, which grow with their content: there is no spill
+to measure, and `getSlideImage` draws one whole card, as tall as it is. See `references/fluid.md`,
+section 6.
+
 1. `reviewSlides {}` for the whole deck. If the result has `remaining`, call it again with those
    `slideIds`. Each issue has a `kind`, the `shapeId` and, for spills, `spillPx` (how far, in
    pixels):
@@ -232,6 +250,8 @@ template.
 | "No presentation is open in an editor tab" | Ask the user to open the presentation and keep the tab open. |
 | "More than one editor tab is open" | Call `listOpenEditorContexts` and pass the `sessionId`. |
 | `listTemplates` returns nothing | Remove the `query` or `category`, widen `language`, or pass `includeLegacy: true`. |
+| The user asked for a fluid presentation and the deck is `slide` | Do not convert it with `setLayoutType`. Pick a fluid template (`listTemplates {layoutType: "fluid"}`) and give the user its `getNewPresentationLink`: the new presentation is fluid. |
+| `insertTemplateSlides` says the template is a slide (or fluid) template | The template and the deck are of different kinds: use a template of the deck's kind, or open a new deck of the kind you need. |
 | `insertTemplateSlides` says a slide was not found | Take the `slideId` or `tag` from `getTemplateLayouts` of the same template. |
 | The inserted slides look different from the rest | The deck's style and the layouts come from different templates. Switch the style with `insertTemplateSlides {templateId, applyThemeFromTemplate: true}` (no slides) and pass the chosen `templateId` on every insert. |
 | A slide still shows "Click to add title" | A slot was not filled: fill it or `deleteShape` it, then audit again. |

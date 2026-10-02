@@ -20,9 +20,12 @@ when more than one editor tab is open.
   the user's presentations.
 - `getNewPresentationLink {templateId?}` returns a link. Without a `templateId` it opens the
   "Create blank presentation" dialog; with one, opening it **creates** a presentation from that
-  template and opens it in the editor.
-- `listTemplates {query?, category?, language?, includeLegacy?, limit?}` lists the gallery
-  templates (up to `limit`, default 20, max 50, sorted by name) with the `total` that matched:
+  template and opens it in the editor. A fluid template gives a link that creates a **fluid**
+  presentation (the result says `layoutType`).
+- `listTemplates {query?, category?, language?, layoutType?, includeLegacy?, limit?}` lists the
+  gallery templates (up to `limit`, default 20, max 50, sorted by name) with the `total` that
+  matched. `layoutType` is `slide` (default) or `fluid`: a fluid presentation is built from a fluid
+  template, never by converting a slide one (`fluid.md`). Each result has:
   `templateId`, `name`, `description`, `categories`, `language`, `themeId`, `palette`, `fonts`,
   `slideCount`, `layouts` (slides per layout tag), `previewUrl` (a page that shows every slide)
   and `variableCount` (above zero: a game or quiz-show flow).
@@ -36,7 +39,8 @@ when more than one editor tab is open.
 - `getPresentationState {scope}` with scope `selected_shapes | selected_slides | current_slide |
   all_slides | presentation_basic | presentation_full`.
 - `getSlideImage {presentationId, slideId | slideIndex}` returns a picture of one slide as the
-  player draws it (a JPEG of the slide, followed by its id, index and size). It shows the saved
+  player draws it (a JPEG of the slide, followed by its id, index and size; in a fluid
+  presentation one whole card, as tall as its content). It shows the saved
   state and takes a few seconds. `presentationId` comes from `listOpenEditorContexts` or
   `listPresentations`.
 - `reviewSlides {slideIds?}` shows each slide in the editor, measures how it really renders and
@@ -50,11 +54,13 @@ when more than one editor tab is open.
 - `setPresentationName {name}`, `setPresentationLanguage {languageCode}` (BCP-47, `vi-VN`)
 - `setPresentationBackground {color}`: the page behind the slides (CSS color, theme variable or
   gradient)
-- `setLayoutType {layoutType: slide | fluid}`: fluid is a scrolling, auto-height page
+- `setLayoutType {layoutType: slide | fluid}`: switches how an existing deck is sized and flowed. It
+  does **not** turn a slide deck into a designed fluid one, because slide layouts are fixed
+  compositions: to make a fluid presentation start from a fluid template (`fluid.md`)
 - `setPresentationPositioningMode {positioningMode: auto | freeform}`
 - `setSlideSize {preset}` or `{width, height}`: presets `16:9` (1280x720), `16:9-hd`, `4:3`,
   `16:10`, `a4-landscape`, `a4-portrait`, `social-post` (1080x1080), `social-story` (1080x1920)
-- `setFluidMaxWidth {maxWidth}`
+- `setFluidMaxWidth {maxWidth}`: the width of the card column of a fluid presentation (templates use 1040px)
 
 ## Slides and layout
 
