@@ -72,7 +72,7 @@ take the space.
   are ignored); `border-radius` `999px` for pills, `40px 0` for leaf corners;
 - glass: `backdrop-filter:blur` `8px` on a translucent group over a picture.
 
-**Marks**: `addShape {subTypeName}` (`oval`, `round-rect`, `donut`, `block-arc`, `chevron`,
+**Marks**: `addShape {shapeType: "dv", subTypeName}` (`rect`, `oval`, `round-rect`, `donut`, `block-arc`, `chevron`,
 `hexagon`, `wave`, `cloud`, `star-4` to `star-20`, `sun-flower`, `frame`, `half-frame`, `corner`,
 `plaque`...); `addSvg {svg}` for blobs, underlines, scribbles, dot grids and ornaments, painted
 with theme colors (`fill='rgb(var(--aie-accent-0-rgb))'`) and without ids (`<linearGradient

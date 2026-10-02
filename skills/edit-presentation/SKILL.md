@@ -45,7 +45,7 @@ slides, and reports before changing anything.
 | Add a designed slide | Find the template of the deck's style: the one in `listTemplates` whose `themeId` equals `getPresentationInfo`'s `themeId` (usually its `templateId`, but not after a style switch). Then `getTemplateLayouts {templateId}`, `insertTemplateSlides {templateId, slides: [{tag}], index}` and fill the returned `slots` with `setShapeText` |
 | Add a slide no layout carries | Compose it (`create-presentation` `references/composed-slides.md`): in a deck made from a template, shapes added without that skeleton land on top of each other |
 | Update a chart's numbers | `setChartData {slideId, shapeId, labels, datasets}` |
-| Restyle the whole deck | Pick a template with `listTemplates`, then `insertTemplateSlides {templateId, applyThemeFromTemplate: true}` (no slides) switches the theme, the colors and fonts of every slide, like the Design tab. Slides keep their own layouts and decor |
+| Restyle the whole deck | A template's look: `listTemplates`, then `insertTemplateSlides {templateId, applyThemeFromTemplate: true}` (no slides). A built-in or own theme: `listThemes`, then `applyTheme {themeId}`. The user's brand: `createTheme` with their colors and fonts (`create-presentation` `references/design-systems.md`). Each switches the colors and fonts of every slide, like the Design tab; slides keep their own layouts and decor |
 | Add a blank slide | `addSlide {slideType: "blank", index}` (always pass `index`), then `add*` tools |
 | Reorder slides | `moveSlide {slideId, toIndex}` (0-based); the slide keeps its id, so go-to-slide links still reach it |
 | Copy or remove slides | `duplicateSlide` copies the current slide (`goToSlide` first), `deleteSlide {slideId}` |

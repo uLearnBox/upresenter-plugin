@@ -26,7 +26,9 @@ templates). They are card libraries with the usual layout tags (`title`, `title 
 `summary`, `end`...) plus tags for their kind of document (a report has `executive summary`,
 `key figures`, `budget`, `risks`; a handbook has `policy`, `faq`, `glossary`). There are few of
 them, so suggest two when you can and say how they differ, with the `previewUrl` of each, as for
-slide templates.
+slide templates, and as the last option a fluid deck designed from scratch in a style chosen for
+the topic or in the user's brand (`design-from-scratch.md`, with `layoutType: "fluid"` and the card
+rules of section 5 below).
 
 If none fits the topic, the closest document-like one (a report or a handbook) still serves most
 subjects: its layouts are generic cards, and you fill them with your own content. Tell the user

@@ -1,6 +1,6 @@
 ---
 name: create-presentation
-description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, using the gallery of designed templates. Builds both kinds of presentation: fixed slides, and fluid ones (a scrolling, responsive document of cards). Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account, in any language (for example tạo bài giảng về ..., tạo presentation fluid về ..., crear una presentación sobre ..., 做一个关于...的演示文稿)."
+description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, using the gallery of designed templates or designing it from scratch on a blank deck (own theme, colors and fonts, composed layouts). Builds both kinds of presentation: fixed slides, and fluid ones (a scrolling, responsive document of cards). Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account, in any language (for example tạo bài giảng về ..., tạo presentation fluid về ..., crear una presentación sobre ..., 做一个关于...的演示文稿)."
 ---
 
 # Create a presentation in uPresenter
@@ -31,8 +31,8 @@ The two rules that make the difference between a designed deck and "text on a ba
 - Call tools **one at a time**, never in parallel, and use the ids returned by earlier calls.
   Shape ids are unique only within a slide and repeat on every slide: pass `slideId` and `shapeId`
   together to every tool that names a shape, both taken from tool results, never guessed.
-- What the tools cannot do: animations, slide transitions, narration, music, custom themes and
-  exports (SCORM, PDF, video). Templates bring their own animations and transitions. When a request
+- What the tools cannot do: animations, slide transitions, narration, music and exports (SCORM,
+  PDF, video). Templates bring their own animations and transitions. When a request
   needs one of these, build the rest and tell the user to add it in the editor.
 - If a call fails with "No presentation is open in an editor tab", ask the user to open the
   presentation and retry. Do not try again in a loop.
@@ -61,6 +61,14 @@ say, build slides.
 
 ### 2. Choose the design language: pick a template
 
+**Two ways to the design.** By default the design comes from a gallery template (this step and
+steps 4 to 7). **Design from scratch** instead when the user asks for it (start from a blank
+deck, "design it yourself", their brand colors and fonts, no template), or when the style they
+want has no template and they do not want the nearest one: then follow
+`references/design-from-scratch.md` (a design language turned into a theme with `createTheme`, a
+planned layout suite, every slide composed and checked by eye) in place of steps 2 and 4 to 7,
+and come back for steps 8 to 10.
+
 Every template is one **design language**: a theme (colors and fonts, what the Design tab
 holds) plus a library of layouts drawn in that style ("Swiss Editorial", "Duotone Mono",
 "Warm Classroom"...). Choosing the language comes first, before any slide exists.
@@ -79,10 +87,15 @@ holds) plus a library of layouts drawn in that style ("Swiss Editorial", "Duoton
 2. **Suggest, do not just pick.** Shortlist two or three templates and put them to the user in one
    short message: for each its name, what it looks like in a few words (from `description`,
    `palette` colors and `fonts`), why it suits this request, which of the layouts the plan needs it
-   has, and its `previewUrl` so the user can look at every slide. Say which one you recommend and
-   ask which to use. **Stop and wait for the answer** before any
-   editing call. Skip the question only when the user already named a template or style, or asked
-   you to choose for them: then pick one and say which and why in one line.
+   has, and its `previewUrl` so the user can look at every slide. Then, as the **last option**,
+   offer to **design it from scratch on a blank deck**: name the design language you would use for
+   this topic (`references/styles.md`, `references/design-systems.md`) with its palette and fonts in
+   a few words, say that the user may give their own brand colors and fonts instead, and that it
+   takes longer than a template. Say which option you recommend and ask which to use. **Stop and
+   wait for the answer** before any editing call. Skip the question only when the user already
+   named a template or style, asked for a blank or custom design, or asked you to choose for them:
+   then pick one and say which and why in one line. If the user picks the blank option, follow
+   `references/design-from-scratch.md` (its step 1 is already agreed).
 3. **One template for the whole deck.** If the wanted style has no template, offer the nearest
    one or borrow a theme and compose (`references/styles.md`, section 4). If nothing fits at
    all, relax the filters; legacy packs (`includeLegacy: true`) have no theme of their own. As a
@@ -267,7 +280,7 @@ anything that needs their input: problems you could not fix, facts to confirm,
 pictures to replace (list the slides whose sample picture stays), pictures you generated and the
 credits left, accents to check in a non-English deck, interactions and games to test in the player
 (the tools cannot play them), and what was asked but is not possible with the tools (animations,
-transitions, narration, music, custom themes). Suggest next steps: preview in the player, share,
+transitions, narration, music). Suggest next steps: preview in the player, share,
 export for an LMS, or restyle with another template.
 
 ## Troubleshooting

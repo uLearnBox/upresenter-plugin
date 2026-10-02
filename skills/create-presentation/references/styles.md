@@ -120,18 +120,19 @@ condensed titles). In that case, in this order:
    | Vintage Heritage | Vintage Scrapbook (a game library, section 5), Ink Wash, Academic Scholarly |
    | Iridescent Chrome | Gradient Orb, Dark UI Product |
 
-2. **Borrow a theme and compose.** `insertTemplateSlides {templateId, applyThemeFromTemplate:
+2. **Design it from scratch.** The style's full spec is in `design-systems.md`: `createTheme`
+   turns it into the deck's theme, and `design-from-scratch.md` composes the slides in it. This
+   gives the exact style, at the cost of many more calls than a template.
+3. **Borrow a theme and compose.** `insertTemplateSlides {templateId, applyThemeFromTemplate:
    true}` with no slides gives the deck the colors and fonts of any template. Slides the
    template's layouts do not cover are then composed with `composed-slides.md`, using the
    signature devices of the wanted style listed there (section 4). Composing takes many more
    calls than inserting layouts: say so, and keep the number of composed slides small.
-3. **A built-in theme.** `selectAppropriateTheme {query, style?, themeName?}` lets the app choose
-   one of its built-in themes from a description. It asks an AI model and may spend the account's
-   credits (the result says how many), and a theme alone is only colors and fonts: the layouts
-   still come from a template or from composing.
+4. **A built-in theme.** `listThemes {query}` shows the app's built-in themes with the topic and
+   style each was made for; `applyTheme {themeId}` gives one to the deck at no cost. A theme alone
+   is only colors and fonts: the layouts still come from a template or from composing.
 
-Never invent a style the tools cannot reach: custom themes (your own colors and fonts) can only
-be made in the editor's Design tab by the user. Tell them that when they need an exact brand.
+For an exact brand, `createTheme` takes the brand's colors and fonts (`design-from-scratch.md`).
 
 ## 5. Game templates for ordinary decks
 
