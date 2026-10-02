@@ -7,15 +7,28 @@ content, inserting only those, and replacing every placeholder with real content
 (colors, fonts, spacing, decor) comes with the layout and follows the deck's theme, so do not
 restyle it.
 
-Contents: 1 Reading a template, 2 Layout tags, 3 Slots and budgets, 4 Filling each kind of
-content, 5 Choosing between variants, 6 Pitfalls
+Contents: 1 Finding and reading a template, 2 Layout tags, 3 Slots and budgets, 4 Filling each
+kind of content, 5 Choosing between variants, 6 Pitfalls, 7 Game and quiz-show templates
 
-## 1. Reading a template
+## 1. Finding and reading a template
 
-`listTemplates` returns, per template: `templateId`, `name`, `description`, `categories`,
-`language`, `themeId`, `palette` (theme colors), `fonts`, `slideCount` and `layouts` (how many
-slides it has per tag). Choose from these:
+`listTemplates` returns up to `limit` templates (default 20, at most 50), sorted by name, and
+`total`, the number that matched. The gallery has about forty themed templates, so a call without
+filters shows only the first half: narrow with `category` or `query` (they match name, description
+and category) before raising `limit`, and check that `total` is not larger than what came back. The
+categories seen so far are Business, Education, Game, Quiz, Healthcare, Nonprofit, Design,
+Marketing and Travel; read them from the results, the gallery grows. Most templates carry English
+sample copy and only a few are Vietnamese, so a `language` filter narrows hard: try with and
+without it.
 
+Per template it returns `templateId`, `name`, `description`, `categories`, `language`, `themeId`,
+`palette` (theme colors), `fonts`, `slideCount`, `layouts` (how many slides it has per tag),
+`previewUrl` and `variableCount`. Choose from these:
+
+- `previewUrl` opens a page that shows every slide of the template: give it to the user next to
+  each suggestion, so they can look before they choose;
+- `variableCount` above zero marks a **game or quiz-show flow**, not a plain layout library: read
+  section 7 before using it;
 - the **description and categories** say what it is for (pitch, lesson, report, quiz...);
 - `layouts` tells whether it has what the plan needs: a `timeline`, a `chart`, `list-5`, the
   `question-*` types of a quiz, or genre tags such as `problem`, `traction` or `key idea`;
@@ -26,7 +39,8 @@ slides it has per tag). Choose from these:
   "playful", "formal").
 
 `getTemplateLayouts {templateId, tag?}` returns every slide of the template (or only those with
-the `tag`): `slideId`, `index`, `tag`, `name`, `itemCount` (list-N), `hasChart` and `chartShapeId`,
+the `tag`): `slideId`, `index`, `tag`, `name`, `actionCount` (interactions wired into the slide),
+`itemCount` (list-N), `hasChart` and `chartShapeId`,
 `tableShapeId` with `tableRows` and `tableColumns`, `hasInfographic` and `entryCount`, `imageSlots`,
 `questionShapeId` and `questionType`, and the `slots`. Read it once per deck and note the `slideId`
 of every layout you will use.
@@ -156,6 +170,10 @@ content`). They differ in composition and budgets. From `getTemplateLayouts` wit
 
 ## 6. Pitfalls
 
+- **A different slide size.** Templates are 1280 x 720. In a deck of another size
+  `insertTemplateSlides` still inserts the layouts but returns a `warnings` entry: set the size
+  first with `setSlideSize`, or choose another template, and tell the user.
+
 - **Inserting the whole library.** Insert only what the outline needs. A 10-slide request gets 10
   slides, whatever the template offers.
 - **Mixing styles.** `insertTemplateSlides` without `templateId` uses the template the deck was
@@ -177,3 +195,27 @@ content`). They differ in composition and budgets. From `getTemplateLayouts` wit
   sample.
 - **Counting characters.** Letters, spaces and punctuation all count. Non-English text is often
   longer than English: leave headroom.
+
+## 7. Game and quiz-show templates
+
+A template with `variableCount` above zero (score, lives, rounds, clues found), usually in the
+Game or Quiz category (an escape room, a quiz show with lives, a dice game, a scoreboard), is a
+**complete flow**. Its buttons add points, take lives, reveal answers and move between slides, and
+`actionCount` shows how wired each layout is. So:
+
+1. **Insert the whole flow, in order, in one call.** List its slides with `getTemplateLayouts`
+   and pass them all to `insertTemplateSlides`. The tool re-points go-to-slide actions only among
+   the slides inserted in the same call; a partial insert removes the jumps to slides that are
+   missing and warns about it, which breaks the game.
+2. **Fill the texts, leave the mechanics.** Questions, answers, clues, names and feedback are
+   yours to write. Do not delete slides or shapes of the flow, retag them or add interactions of
+   your own on top. Afterwards `getVariables` and `getInteractions` show what the flow does.
+3. **Plan the content to the flow, not the other way round.** The number of rounds, doors or
+   clues is the template's: write exactly that many. If the user needs a different structure, pick
+   another template.
+4. **Check the player controls.** Games usually need free navigation locked
+   (`setNavigationLock`) and a suitable player mode; look at what the flow already sets before
+   changing anything.
+5. If the user only wants a quiz, not a game, take the `question-*` layouts of a normal template
+   instead (`create-quiz`).
+

@@ -52,14 +52,17 @@ holds) plus a library of layouts drawn in that style ("Swiss Editorial", "Duoton
 "Warm Classroom"...). Choosing the language comes first, before any slide exists.
 
 1. `listTemplates` with a `query` or `category` that matches the genre or mood ("pitch", "lesson",
-   "report", "quiz", "dark") and the `language` of the deck. Read each result's `description`,
-   `categories`, `layouts` (tag counts), `language`, `palette` and `fonts`. The tags the plan needs
-   must exist in the template: a `timeline`, a `chart`, `list-5`, the `question-*` types of a quiz.
+   "report", "quiz", "dark"). The gallery has about forty templates and a call shows 20 at most:
+   compare `total` with what came back and narrow the search rather than judging from the first
+   page. Read each result's `description`, `categories`, `layouts` (tag counts), `language`,
+   `palette` and `fonts`. The tags the plan needs must exist in the template: a `timeline`, a
+   `chart`, `list-5`, the `question-*` types of a quiz. A template with `variableCount` above zero
+   is a game flow with its own structure: `references/template-layouts.md`, section 7.
 2. **Suggest, do not just pick.** Shortlist two or three templates and put them to the user in one
    short message: for each its name, what it looks like in a few words (from `description`,
-   `palette` colors and `fonts`), why it suits this request, and which of the layouts the plan needs
-   it has. Say which one you recommend and ask which to use. The user can preview every template in
-   the Templates page of their uPresenter dashboard. **Stop and wait for the answer** before any
+   `palette` colors and `fonts`), why it suits this request, which of the layouts the plan needs it
+   has, and its `previewUrl` so the user can look at every slide. Say which one you recommend and
+   ask which to use. **Stop and wait for the answer** before any
    editing call. Skip the question only when the user already named a template or style, or asked
    you to choose for them: then pick one and say which and why in one line.
 3. **One template for the whole deck.** If nothing fits, relax the filters or pass

@@ -22,10 +22,12 @@ when more than one editor tab is open.
   "Create blank presentation" dialog; with one, opening it **creates** a presentation from that
   template and opens it in the editor.
 - `listTemplates {query?, category?, language?, includeLegacy?, limit?}` lists the gallery
-  templates: `templateId`, `name`, `description`, `categories`, `language`, `themeId`, `palette`,
-  `fonts`, `slideCount`, and `layouts` (slides per layout tag).
+  templates (up to `limit`, default 20, max 50, sorted by name) with the `total` that matched:
+  `templateId`, `name`, `description`, `categories`, `language`, `themeId`, `palette`, `fonts`,
+  `slideCount`, `layouts` (slides per layout tag), `previewUrl` (a page that shows every slide)
+  and `variableCount` (above zero: a game or quiz-show flow).
 - `getTemplateLayouts {templateId, tag?}` lists a template's slides: `slideId`, `index`, `tag`,
-  `name`, `itemCount`, `hasChart` with `chartShapeId`, `tableShapeId` with `tableRows` and
+  `name`, `actionCount`, `itemCount`, `hasChart` with `chartShapeId`, `tableShapeId` with `tableRows` and
   `tableColumns`, `hasInfographic` with `entryCount`, `imageSlots`, `questionShapeId` with
   `questionType`, and `slots` (`shapeId`, `role`, `maxChars`, `minChars`, and either `prompt` for an
   empty placeholder or `sample` for text that ships in the layout and must be replaced).
@@ -62,7 +64,8 @@ when more than one editor tab is open.
   `applyThemeFromTemplate: true` the deck also switches to the template's theme (restyles every
   slide; no credits); with that flag and no `slides` only the theme changes. Returns each
   new slide's `slideId`, `slideIndex`, `tag` and `slots`, plus `chartShapeId`, `tableShapeId`,
-  `questionShapeId`, `entryCount` and `imageSlots` where present. Slots still show their prompt until `setShapeText`
+  `questionShapeId`, `entryCount` and `imageSlots` where present, and `warnings` (slide size
+  differs from the deck, or go-to-slide actions had to be removed). Slots still show their prompt until `setShapeText`
   fills them; `getPresentationState` marks them with `placeholder` and gives `maxChars`.
 - `generateShapeImage {shapeId, prompt, model?, ratio?, style?}` (offered only on some connections)
   generates a picture into an image slot and spends credits; the result has `creditsRemaining`.
