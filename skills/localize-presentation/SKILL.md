@@ -1,6 +1,6 @@
 ---
 name: localize-presentation
-description: "Translate a uPresenter presentation or lesson into another language, or build one in a language other than English, and adapt it to that locale: every text, quiz question, answer and feedback, chart label and table, plus the presentation language that drives the player's buttons, dates and text direction. Use when the user asks to translate, localize or convert a presentation to another language (for example dịch bài giảng sang tiếng Anh, traducir la presentación, 翻译成中文), or to make a presentation for a non-English audience."
+description: "Translate a uPresenter presentation or lesson into another language, or build one in a language other than English, and adapt it to that locale: every text, quiz question, answer and feedback, chart label and table, plus the presentation language that drives the player's buttons, dates and text direction. Use when the user asks to translate, localize or convert a presentation to another language (for example dịch bài giảng sang tiếng Anh, traducir la presentación, 翻译成中文, traduire la présentation), or to make a presentation for a non-English audience."
 ---
 
 # Translate or localize a presentation in uPresenter
@@ -9,9 +9,24 @@ A translated deck is only done when the words, the player around them and the la
 language. Words are the easy part: text lengths change, fonts may lack the letters, quiz feedback
 defaults to English, and right-to-left languages mirror the slide.
 
-Editing happens in the user's open editor tab, like every other uPresenter edit: follow step 1 of
-`edit-presentation` to get the presentation open, call tools one at a time, and always pass
-`slideId` and `shapeId` together.
+## Ground rules
+
+- Editing happens in the user's **open editor tab**, which must stay open (ask the user not to click
+  around in it). Not open: `listOpenEditorContexts`, else `listPresentations` and give the user the
+  `editorUrl`; with several editors pass the `sessionId`.
+- Call tools **one at a time**; pass `slideId` and `shapeId` together (shape ids repeat on every
+  slide), both from tool results.
+- **Translating in place replaces the original and the tools cannot copy a deck.** Before the first
+  edit remind the user to duplicate the presentation in their dashboard and open the copy if they
+  want to keep the source language.
+- Template first: any slide you must add (a missing results or summary slide) comes from the deck's
+  template layouts (`listTemplates`, `getTemplateLayouts`, `insertTemplateSlides`), not a blank
+  slide. Template sample text that was never replaced is untranslated content too: translate or
+  delete it.
+- Check with `reviewSlides` and `getSlideImage`. Not possible with the tools: animations,
+  transitions, narration/TTS, exports.
+- If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
+  `describeTool` and run it with `callTool`.
 
 ## What the presentation language does (read once)
 
@@ -93,8 +108,29 @@ For each slide, in order:
 
 ### 6. What cannot be translated
 
-Say so in the report instead of leaving it silently: text drawn inside an image, audio and video
-narration, embedded videos and documents. List the slides where they are.
+Say so in the report instead of leaving it silently, and list the slides where each occurs:
+
+- text drawn inside an image or SVG, and text baked into a chart picture;
+- audio and video narration, subtitles inside a video, embedded videos and documents (the tools
+  cannot make TTS or edit media);
+- image alt text, speaker notes and slide transitions or animation text: the tools do not expose
+  them, so the user checks them in the editor;
+- the player's own buttons come from `setPresentationLanguage`, not from your translation, and only
+  for the languages in `references/locales.md`;
+- a font that lacks the script (see step 7).
+
+### 6b. Right-to-left languages (Arabic, Hebrew, Persian, Urdu)
+
+1. `setPresentationLanguage` first (`ar-EG`, `he-IL`, `fa-IR`, `ur-PK`): the slide mirrors, text aligns
+   right and answer order starts from the right.
+2. Translate as usual. Keep formulas, numbers, Latin brand names and code left to right inside the
+   text (`[[katex:...]]` markers stay as they are). Do not add manual alignment or reorder shapes to
+   imitate RTL: the mirroring is automatic.
+3. Look at every slide with `getSlideImage`: decor on the wrong side, arrows pointing the wrong
+   way, a timeline or progress that reads backwards. Report each to the user; a template whose
+   layouts mirror well may be a better start (`listTemplates` with the `language` filter).
+4. Check the font covers the script (Noto Sans Arabic, Noto Naskh Arabic, Vazirmatn, Noto Sans
+   Hebrew); an Urdu deck reads best in a Nastaliq font.
 
 ### 7. Review and fix
 
@@ -110,7 +146,8 @@ Translated text is the usual cause of overflow.
    the feedback is in the new language.
 
 If a font lacks the script, tell the user and propose another template whose fonts cover it
-(`listTemplates` shows each template's `fonts` and `language`).
+(`listTemplates` shows each template's `fonts` and `language`, and takes a `language` filter).
+Also read every text once more for sample copy left in the template's own language.
 
 ### 8. Report
 

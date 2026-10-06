@@ -1,6 +1,6 @@
 ---
 name: review-presentation
-description: "Audit an existing uPresenter presentation or lesson and report what to improve, without changing it: text that spills out of cards, leftover template sample text and unfilled placeholders, math typed as plain characters, weak story or structure, readability and contrast, inconsistent design, quiz mistakes and tracking settings. Use when the user asks to review, check, proofread, critique, QA or give feedback on a presentation in uPresenter (for example kiểm tra bài giảng, revisar la presentación), or before they share or publish one."
+description: "Audit an existing uPresenter presentation or lesson and report what to improve, without changing it: text that spills out of cards, leftover template sample text and unfilled placeholders, math typed as plain characters, weak story or structure, readability and contrast, inconsistent design, quiz mistakes and tracking settings. Use when the user asks to review, check, proofread, critique, QA or give feedback on a presentation in uPresenter (for example kiểm tra bài giảng, revisar la presentación, 检查演示文稿, vérifier la présentation), or before they share or publish one."
 ---
 
 # Review a presentation in uPresenter
@@ -10,8 +10,23 @@ should change? It looks at the deck the way a viewer does (the rendered slides),
 eye cannot judge. **Report first; change nothing until the user says which fixes they want.** Then
 apply them with the `edit-presentation` workflow and review the changed slides again.
 
-The presentation must be open in an editor tab (step 1 of `edit-presentation`). Call tools one at a
-time, and pass `slideId` and `shapeId` together.
+## Ground rules
+
+- The presentation must be **open in an editor tab** and stay open (ask the user not to click around
+  in it). Not open: `listOpenEditorContexts`, else `listPresentations` and give the user the
+  `editorUrl`; with several editors pass the `sessionId`.
+- Call tools **one at a time**; pass `slideId` and `shapeId` together (shape ids repeat on every
+  slide).
+- Reviewing changes nothing. Fixes come after the user chooses them, with `edit-presentation`.
+- `reviewSlides` measures, `getSlideImage` shows; use both, and trust the picture when they disagree.
+  Up to 40 slides per `reviewSlides` call: follow `remaining`.
+- Template first: judge the deck against its template (`getPresentationInfo` gives `templateId` and
+  `themeId`; `listTemplates` and `getTemplateLayouts` show which layouts and `sample` slots exist).
+  Recommend fixes that reuse a template layout rather than hand-built slides.
+- The tools cannot play the deck, hear audio, or see animations, transitions or the phone layout:
+  say so in the report.
+- If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
+  `describeTool` and run it with `callTool`.
 
 ## Workflow
 
@@ -56,6 +71,9 @@ wrong and the fix.
 **Content**
 - Facts, numbers and names are right and consistent between slides; claims are supported.
 - Nothing from the template's sample copy remains (figures, labels, timeline entries, "Company name").
+  Sample text is not marked as a placeholder, so `reviewSlides` will not flag it: compare the
+  texts from `getPresentationState` with the template's `sample` slots (`getTemplateLayouts`) and
+  check chart titles, legends and table cells too. List each leftover for replacement.
 - Wording is clear and in one language; no typos; one register throughout.
 
 **Text and layout** (from the measurements and the pictures)
@@ -83,6 +101,25 @@ wrong and the fix.
 - Fill-in answers are not case-sensitive unless the case matters; text-entry answers list the
   spellings learners will type.
 
+**Tracking and interaction wiring** (`getVariables`, `getInteractions {slideId}` per interactive
+slide, `getPresentationSettings`, `getQuestionsInfo`)
+- Unused variables: a variable that no interaction, condition or `{{name}}` text reads or writes is
+  dead weight; a variable read but never changed is a bug (a score nothing adds to).
+- Dead conditions: a rule that can never be true (a threshold above the maximum score, comparing a
+  text variable with a number, a variable that was deleted); two conditional `go-to-slide`
+  actions that overlap or leave a gap (for example `>= 20` and `< 20` is complete, `> 20` and
+  `< 20` is not).
+- Questions without a correct answer, graded questions with 0 points, `question-correct` actions on
+  a survey question, score interactions missing on some graded questions, points that do not add up
+  to the progress `max` or to the success threshold.
+- Completion and success sanity: `setCompletionCriteria` and `setSuccessCriteria` use units that
+  match (percent vs absolute) and are reachable (a pass mark of 80% with too few points; "all
+  slides viewed" in a deck with a locked, branching path that skips slides); attempts and resume
+  option match the purpose; a graded deck has a final slide that finishes the attempt
+  (`finish-presentation`).
+- Player settings match the purpose: free navigation for a lecture, `setPlayerMode` quiz or game
+  and a navigation lock only where the deck's own buttons can move through every slide.
+
 **Interactions and games** (`getInteractions`, `getVariables`)
 - Every button does something; every go-to-slide target exists; reveal targets start hidden.
 - Game questions use `navigation: "stay"`; navigation is not placed on both `question-answered` and
@@ -93,6 +130,9 @@ wrong and the fix.
 **Accessibility**
 - Text contrast is strong on every background, body text is large enough, and no meaning depends on
   color alone.
+- Known app gaps (report as limits, not as the author's fault): the editor has no control for image
+  alt text, so informative pictures cannot be described to screen readers; say what the picture
+  shows in nearby text instead. Animations and hover-only content are not checkable here.
 
 ### 5. Report
 

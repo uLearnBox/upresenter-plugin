@@ -1,0 +1,16 @@
+interface:
+  display_name: "Build fluid lesson"
+  short_description: "Make a scrolling responsive lesson"
+  brand_color: "#6655F0"
+  default_prompt: "Make a fluid scrolling lesson about recycling from a fluid template."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

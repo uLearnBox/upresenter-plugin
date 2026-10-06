@@ -1,0 +1,20 @@
+{
+  "name": "upresenter",
+  "interface": {
+    "displayName": "uPresenter"
+  },
+  "plugins": [
+    {
+      "name": "upresenter",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_FIRST_USE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

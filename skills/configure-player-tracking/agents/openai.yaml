@@ -1,0 +1,16 @@
+interface:
+  display_name: "Configure player and tracking"
+  short_description: "Set completion, attempts and player options"
+  brand_color: "#6655F0"
+  default_prompt: "Set my open presentation to complete after the last slide, with 2 quiz attempts."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

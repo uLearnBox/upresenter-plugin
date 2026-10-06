@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "upresenter",
-  "version": "1.1.0",
-  "description": "Build and edit interactive presentations, lessons and quizzes in your uPresenter account.",
+  "version": "1.2.0",
+  "description": "Build and edit interactive presentations, lessons, quizzes and games in your uPresenter account.",
   "author": {
     "name": "uLearnBox",
     "url": "https://upresenter.ai"
@@ -10,13 +10,23 @@
   "homepage": "https://upresenter.ai",
   "repository": "https://github.com/uLearnBox/upresenter-plugin",
   "license": "MIT",
-  "keywords": ["presentations", "slides", "e-learning", "quiz", "lessons", "education", "uPresenter"],
+  "keywords": [
+    "presentations",
+    "slides",
+    "e-learning",
+    "quiz",
+    "games",
+    "lessons",
+    "fluid",
+    "education",
+    "uPresenter"
+  ],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "uPresenter",
         "shortDescription": "Build interactive lessons",
-        "longDescription": "uPresenter is a web editor for interactive presentations and e-learning lessons. This plugin connects ChatGPT to your uPresenter account so it can list your presentations, create new ones, and build or edit slides for you from a gallery of professionally designed templates: titles and text, lists, timelines, infographics, charts, tables, layouts and styling, plus graded quizzes in 14 question types with scoring and feedback.\n\nEditing happens in the presentation you have open in the uPresenter editor in your browser, so you see every change as it is made and can undo it. You sign in to uPresenter and approve access once; the plugin never sees your password, and you can remove its access at any time under Connected apps in your account settings.\n\nTypical requests: draft a 12-slide lesson on a topic for a grade level, turn your notes into slides, add a 5-question quiz with feedback, restyle a deck, translate it to another language, or review it before you present.",
+        "longDescription": "uPresenter is a web editor for interactive presentations and e-learning lessons. This plugin connects your AI assistant to your uPresenter account so it can list your presentations, create new ones, and build or edit slides for you from a gallery of professionally designed templates, or design a deck from scratch on a blank canvas: titles and text, lists, timelines, infographics, charts, tables, layouts and styling, fixed slides or fluid scrolling lessons, plus graded quizzes in 14 question types, interactive games, interactions, and player and tracking settings.\n\nEditing happens in the presentation you have open in the uPresenter editor in your browser, so you see every change as it is made and can undo it. You sign in to uPresenter and approve access once; the plugin never sees your password, and you can remove its access at any time under Connected apps in your account settings.\n\nTypical requests: draft a 12-slide lesson on a topic for a grade level, turn your notes into slides, add a 5-question quiz with feedback, build a quiz-show game with a timer and lives, make a fluid lesson, restyle a deck, translate it to another language, or review it before you present.",
         "developerName": "uLearnBox",
         "category": "Productivity",
         "capabilities": [
@@ -24,22 +34,25 @@
           "Build decks from designed templates",
           "Edit slides, text, layouts and styling",
           "Add graded quizzes and question types",
+          "Build games and interactions",
+          "Create fluid scrolling lessons",
+          "Configure player and tracking settings",
           "Translate presentations to other languages",
           "Review a presentation before you present it",
           "List your presentations"
         ],
         "websiteURL": "https://upresenter.ai",
-        "supportURL": "https://upresenter.ai/contact",
         "privacyPolicyURL": "https://upresenter.ai/privacy",
         "termsOfServiceURL": "https://upresenter.ai/terms",
         "defaultPrompt": [
           "Create a 10-slide lesson on photosynthesis for grade 6",
-          "Add a 5-question quiz with feedback to my open presentation",
+          "Build a quiz-show game with a timer and 3 lives in my open presentation",
           "Review my open presentation and suggest improvements"
         ],
         "brandColor": "#6655F0",
         "composerIcon": "./assets/composer-icon.png",
-        "logo": "./assets/logo.png"
+        "logo": "./assets/logo.png",
+        "supportURL": "https://upresenter.ai/contact"
       }
     }
   }

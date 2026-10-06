@@ -1,8 +1,8 @@
 {
   "name": "upresenter",
   "displayName": "uPresenter",
-  "version": "1.1.0",
-  "description": "Build and edit interactive presentations, lessons and quizzes in your uPresenter account from Claude.",
+  "version": "1.2.0",
+  "description": "Build and edit interactive presentations, lessons, quizzes and games in your uPresenter account.",
   "author": {
     "name": "uLearnBox",
     "url": "https://upresenter.ai"
@@ -10,5 +10,15 @@
   "homepage": "https://upresenter.ai",
   "repository": "https://github.com/uLearnBox/upresenter-plugin",
   "license": "MIT",
-  "keywords": ["presentations", "slides", "e-learning", "quiz", "lessons", "education", "uPresenter"]
+  "keywords": [
+    "presentations",
+    "slides",
+    "e-learning",
+    "quiz",
+    "games",
+    "lessons",
+    "fluid",
+    "education",
+    "uPresenter"
+  ]
 }

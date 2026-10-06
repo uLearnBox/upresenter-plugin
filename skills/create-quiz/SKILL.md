@@ -1,25 +1,42 @@
 ---
 name: create-quiz
-description: "Add graded quiz questions, knowledge checks, scoring, feedback and results to a uPresenter presentation. Use when the user wants a quiz, test, assessment, survey, review questions or a score-based lesson in uPresenter, in any of its 14 question types, in any language (for example tạo câu hỏi trắc nghiệm, crear un cuestionario, 做一份测验)."
+description: "Add graded quiz questions, knowledge checks, scoring, feedback and results to a uPresenter presentation, using the template's own question-* layouts so the quiz matches the deck. Use when the user wants a quiz, test, assessment, survey, review questions or a score-based lesson in uPresenter, in any of its 14 question types, in any language (for example tạo câu hỏi trắc nghiệm, crear un cuestionario, 做一份测验, créer un quiz)."
 ---
 
 # Add quizzes and assessment in uPresenter
 
 Questions are native objects of the presentation, graded by the player and tracked for LMS
-reporting. This skill assumes a presentation is open in an editor tab. If not, follow step 4 of
-the `create-presentation` skill first (`listOpenEditorContexts`, then `listPresentations` or
-`getNewPresentationLink`). Call tools one at a time, use the ids they return, and pass `slideId`
-with every `shapeId` (shape ids repeat on every slide).
+reporting.
+
+## Ground rules
+
+- A presentation must be **open in an editor tab** and stay open (ask the user not to click around
+  in it). If none is open: `listOpenEditorContexts`, then `listPresentations` or
+  `getNewPresentationLink` (see `create-presentation`, step 4). With several editors open pass the
+  `sessionId`.
+- Call tools **one at a time**, use the ids they return, and pass `slideId` with every `shapeId`
+  (shape ids repeat on every slide).
+- **Template first:** every question slide starts from a `question-*` layout of the deck's
+  template (`listTemplates`, `getTemplateLayouts`, `insertTemplateSlides`). A blank slide is only
+  for a type the template lacks. Slots with `sample` text must be replaced or deleted.
+- Check with `reviewSlides` and `getSlideImage` before reporting; the tools cannot play the quiz.
+- Not possible with the tools: animations, transitions, narration/TTS, exports. Tell the user to
+  use the editor.
+- If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
+  `describeTool` and run it with `callTool`.
 
 ## Question workflow
 
 ### In a deck built from a template (preferred)
 
-Every template has designed question slides tagged `question-mc`, `question-mr`, `question-tf`,
+Templates carry designed question slides tagged `question-mc`, `question-mr`, `question-tf`,
 `question-fte`, `question-sq`, `question-ma`, `question-fb`, `question-sl`, `question-dd` and
-`question-dw` (some also `question-es`, `question-hs`, `question-lb`, `question-mdd`). Using them
-keeps the quiz in the same visual style as the rest of the deck. `getTemplateLayouts {templateId,
-tag: "question-mc"}` shows which exist and the variants of each.
+`question-dw`, and some also `question-es`, `question-hs`, `question-lb`, `question-mdd` (the full
+set is the 14 tags in the table below). Using them keeps the quiz in the same visual style as the
+rest of the deck. `getTemplateLayouts {templateId, tag: "question-mc"}` shows which exist and the
+variants of each; `listTemplates` `layouts` counts them per tag, so when choosing a template for a
+quiz check that it has the tags you need (`category: "Quiz"` lists quiz-oriented ones; filter by
+`language` and `layoutType` too).
 
 1. Find the template the deck's style comes from: `getPresentationInfo` gives `themeId`; the
    template is the one whose `themeId` matches in `listTemplates` (usually the deck's own
@@ -73,23 +90,31 @@ slide's title via `setShapeText`), choice answers, sequence items, matching pair
 Dropdown options and the accepted answers of fill-text-entry questions are plain text only: for
 math there, ask for a number or a short word answer, or use a choice or fill-blanks question.
 
-## Answer models by type
+## The 14 question types
 
-| questionType | `setQuestionAnswers` payload |
-|---|---|
-| multiple-choice, multiple-response | `answers: [{text, correct}]`, at least 2 (one `correct` for multiple-choice, several for multiple-response) |
-| true-false | exactly 2 `answers: [{text, correct}]`, in the deck's language |
-| dropdown | `answers: [{text, correct}]` (plain text) |
-| fill-text-entry (short answer) | `answers`: every accepted spelling, all `correct: true`; matching is case-sensitive until `caseSensitive: false` |
-| essay | cannot be auto-graded: use `mode: "survey"` or `feedback: "submitted"` |
-| slider | `correctValue, min, max, step` |
-| sequence | `items: [...]` in the correct order, at least 2 (the player shuffles them) |
-| matching | `pairs: [{source, target}]`, 2 to 6 pairs |
-| fill-blanks | `sentence` with `___` per blank, `blanks: [...]` |
-| drag-words | as fill-blanks plus `distractors: [...]` |
-| multiple-dropdown | `sentence` plus `dropdowns: [{correct, alternatives: [...]}]` |
-| hotspot | `hotspots: [{shape: "point" \| "rectangle", x, y, width, height}]` in percent; the slide needs an image first |
-| label | `labels: [{text, x, y}]` plus `distractors` (also needs an image) |
+`questionType` is the name `addQuestion` takes; the tag is the template layout to insert first.
+
+| questionType | Template tag | `setQuestionAnswers` payload |
+|---|---|---|
+| multiple-choice | `question-mc` | `answers: [{text, correct}]`, at least 2, exactly one `correct` |
+| multiple-response | `question-mr` | same, several `correct` |
+| true-false | `question-tf` | exactly 2 `answers: [{text, correct}]`, in the deck's language |
+| fill-text-entry | `question-fte` | `answers`: every accepted spelling, all `correct: true`; case-sensitive until `caseSensitive: false` |
+| essay | `question-es` | cannot be auto-graded: use `mode: "survey"` or `feedback: "submitted"` |
+| dropdown | `question-dd` | `answers: [{text, correct}]` (plain text) |
+| slider | `question-sl` | `correctValue, min, max, step` |
+| sequence | `question-sq` | `items: [...]` in the correct order, at least 2 (the player shuffles them) |
+| matching | `question-ma` | `pairs: [{source, target}]`, 2 to 6 pairs |
+| hotspot | `question-hs` | `hotspots: [{shape: "point" \| "rectangle", x, y, width, height}]` in percent; needs an image |
+| label | `question-lb` | `labels: [{text, x, y}]` plus `distractors` (needs an image) |
+| fill-blanks | `question-fb` | `sentence` with `___` per blank, `blanks: [...]` |
+| drag-words | `question-dw` | as fill-blanks plus `distractors: [...]` |
+| multiple-dropdown | `question-mdd` | `sentence` plus `dropdowns: [{correct, alternatives: [...]}]` |
+
+`getSupportedQuestionTypes` lists the names the app accepts. Read one question back with
+`getQuestionInfo {slideId, shapeId}` (settings plus the authored answer model) and the whole deck
+with `getQuestionsInfo {scope: "all-slides", includeAnswers: true}` (without `scope` only the
+current slide is read).
 
 Vary the types across a quiz: for example two multiple-choice, one true-false, one matching,
 one fill-blanks. Check `getSupportedQuestionTypes` if unsure which names exist.
@@ -116,11 +141,12 @@ Read the result back with `getQuestionsInfo {scope: "all-slides", includeAnswers
 
 ## Score tracking
 
-1. `createVariable {name: "score", type: "number", defaultValue: 0}` returns the variable id.
+1. `createVariable {name: "score", type: "number", defaultValue: 0}` returns the variable id (a UUID such as
+   `3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813`, used in the examples below; always use the one returned).
 2. On every graded question add an interaction that adds its points on a correct answer:
 
 ```json
-{"tool": "addInteraction", "args": {"slideId": 3, "shapeId": 7, "eventType": "question-correct", "actionType": "adjust-variable", "actionData": {"variableId": "VAR", "operation": "add", "operand": {"kind": "literal", "value": 10}}}}
+{"tool": "addInteraction", "args": {"slideId": 3, "shapeId": 7, "eventType": "question-correct", "actionType": "adjust-variable", "actionData": {"variableId": "3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813", "operation": "add", "operand": {"kind": "literal", "value": 10}}}}
 ```
 
 Operands are typed objects (`{"kind": "literal", "value": 10}`), never a bare number.
@@ -132,8 +158,8 @@ Build the target slides first so their ids exist. Then add two conditional `go-t
 actions to the same button; each runs only when its condition holds:
 
 ```json
-{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 12}, "condition": {"match": "all", "rules": [{"variableId": "VAR", "operator": "gte", "operand": {"kind": "literal", "value": 20}}]}}}
-{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 11}, "condition": {"match": "all", "rules": [{"variableId": "VAR", "operator": "lt", "operand": {"kind": "literal", "value": 20}}]}}}
+{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 12}, "condition": {"match": "all", "rules": [{"variableId": "3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813", "operator": "gte", "operand": {"kind": "literal", "value": 20}}]}}}
+{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 11}, "condition": {"match": "all", "rules": [{"variableId": "3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813", "operator": "lt", "operand": {"kind": "literal", "value": 20}}]}}}
 ```
 
 A review slide should end with a button back to the questions.
@@ -163,7 +189,7 @@ deck as a quiz.
 
 ## Check
 
-Run `reviewSlides` on the question slides: long questions or answers can spill out of their card.
+Run `reviewSlides` on the question slides: long questions or answers can spill out of their card. `reviewSlides` also reports unfilled placeholders; sample text that ships in a layout (`sample` slots, answer labels like "Option A") is not marked, so read each slide's texts and replace or delete it.
 Then run `getQuestionsInfo {scope: "all-slides", includeAnswers: true}` (without `scope` it reads
 only the current slide): every graded question has a correct answer, points add up to the
 progress `max`, and feedback texts are in the deck's language. Check the score and branching

@@ -84,7 +84,7 @@ when more than one editor tab is open.
   returns `themeId`. Colors `#rrggbb`, `rgb()` or `rgba()`; backgrounds also
   `linear-gradient(135deg, #111111 0%, #2A2A2A 100%)` or `radial-gradient(...)`; fonts are Google
   Fonts families; the name keeps ASCII letters. Specs per style: `design-systems.md`.
-- `selectAppropriateTheme {query}` lets an AI model pick a built-in theme; it may spend credits
+- To pick a theme, read `listThemes` (each has `topic`, `style`, `palette`, `fonts`) and choose one yourself, then `applyTheme`; there is no separate theme-picking tool.
 - `setSlideSize {preset}` or `{width, height}`: presets `16:9` (1280x720), `16:9-hd`, `4:3`,
   `16:10`, `a4-landscape`, `a4-portrait`, `social-post` (1080x1080), `social-story` (1080x1920)
 - `setFluidMaxWidth {maxWidth}`: the width of the card column of a fluid presentation (templates use 1040px)
@@ -172,6 +172,11 @@ Image sources: `source` (a resource filename or an http(s) URL), `dataUrl`, or `
 `mimeType`; `objectFit: contain | cover | fill | scale-down | none`.
 
 - `addImage`, `replaceImage {slideId, shapeId, ...}`, `addImagePlaceholder`
+- `convertImageFormat {slideId, shapeId, format: png | jpg | webp, quality?, compression?}` converts
+  a stored raster image (`quality` 1-100 for jpg/webp only, `compression` 0-9 for png only); the
+  source is kept so it can be undone. It does not redesign or upscale the image.
+- `upscaleImage {slideId, shapeId, scale: 2 | 4 | 8, faceEnhance?}` (offered only when the connection
+  has AI media; uses credits) makes an existing raster image sharper without replacing it.
 - `setContainerBackgroundImage {slideId, shapeId?, source, backgroundSize, backgroundPosition}`
 - `addAudio {source, controls, autoplay}`, `addVideo {source, controls, autoplay}`,
   `addVideoPlaceholder`
@@ -216,12 +221,17 @@ case-sensitive). Read back with `getQuestionsInfo {scope: "all-slides", includeA
 - `addChart {chartType: bar | column | line | pie | doughnut | polarArea | radar | scatter |
   bubble, title, labels[], datasets: [{label, data[]}]}`; `setChartText {title, labels,
   datasetLabels, xAxisName, yAxisName}`; `getChartInfo`
+- `getSupportedChartTypes` lists the chart types the app can draw (read-only).
 - `setChartData {slideId, shapeId, title?, labels[], datasets: [{label, data[]}]}` replaces the
-  numbers of an existing category chart (a template's sample figures) and keeps its type and
-  style; one number per label per series; pie and doughnut take one series; scatter and bubble
-  are not supported
+  numbers of an existing chart (a template's sample figures) and keeps its type and style; it
+  covers bar, column, line, pie, doughnut, polarArea and radar only; one number per label per
+  series; pie, doughnut and polarArea take one series. Scatter and bubble charts are not set
+  through it: `addChart` can add them with built-in sample data only, so tell the user to
+  edit those values in the editor.
 - `addTable {rows, columns, preset: basic | header | sideHeader, headerRow, headerColumn, csv |
-  data[][]}`; `setTableStyle`, `setTableCellsText {cells: [{rowIndex, columnIndex, text}]}`,
+  data[][]}`; `setTableStyle`, `setTableCellsText {cells: [{rowIndex, columnIndex, text}]}` (many cells), `setTableCellText
+  {rowIndex, columnIndex, text}` (one cell, keeps its styling), `selectTableArea {targetType: table |
+  row | column, rowIndex?, columnIndex?}` (select the area a following style call applies to),
   `editTableStructure {action, direction}`, `getTableInfo`. Text styles for tables go through
   `setTextStyle` with `targetType: row | column | cell`.
 

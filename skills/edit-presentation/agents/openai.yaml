@@ -1,0 +1,16 @@
+interface:
+  display_name: "Edit presentation"
+  short_description: "Restyle, fix and reorder slides"
+  brand_color: "#6655F0"
+  default_prompt: "Shorten the text on every slide of my open presentation and fix any overflow."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

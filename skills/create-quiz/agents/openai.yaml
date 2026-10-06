@@ -1,0 +1,16 @@
+interface:
+  display_name: "Create quiz"
+  short_description: "Add graded quizzes and results"
+  brand_color: "#6655F0"
+  default_prompt: "Add a 5-question quiz with feedback and a results slide to my open presentation."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

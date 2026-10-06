@@ -1,0 +1,16 @@
+interface:
+  display_name: "Review presentation"
+  short_description: "Audit a deck and list what to fix"
+  brand_color: "#6655F0"
+  default_prompt: "Review my open presentation before I present it and report what to improve."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

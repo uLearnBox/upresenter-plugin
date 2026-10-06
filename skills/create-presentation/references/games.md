@@ -38,7 +38,7 @@ So, for a game:
 
 - **Variables** (`createVariable`): number, text or boolean; they live across slides and reset on
   "Try again". System values for conditions and text: `$score`, `$maxScore`, `$scorePercentage`
-  (a fraction, so compare with `gte` and `lt`, never `eq`), `$correctAnswerCount`,
+  (0 to 100, not rounded, so compare with `gte` and `lt`, never `eq`), `$correctAnswerCount`,
   `$answeredQuestionCount`, `$slideNumber`, `$timeLeft`...
 - **Live text**: any text can show `{{lives}}`, `{{score}}` or `{{$timeLeft}}`; the player keeps it
   current. Write the placeholder in one go (`setShapeText`), not split across styles. The editor

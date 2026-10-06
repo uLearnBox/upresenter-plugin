@@ -1,0 +1,16 @@
+interface:
+  display_name: "Design interactions"
+  short_description: "Add reveals, tabs, hotspots and flows"
+  brand_color: "#6655F0"
+  default_prompt: "Add click-to-reveal cards and a hotspot image to slide 3 of my open presentation."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

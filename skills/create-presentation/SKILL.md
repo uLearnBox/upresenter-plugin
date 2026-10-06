@@ -1,6 +1,6 @@
 ---
 name: create-presentation
-description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, using the gallery of designed templates or designing it from scratch on a blank deck (own theme, colors and fonts, composed layouts). Builds both kinds of presentation: fixed slides, and fluid ones (a scrolling, responsive document of cards). Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account, in any language (for example tạo bài giảng về ..., tạo presentation fluid về ..., crear una presentación sobre ..., 做一个关于...的演示文稿)."
+description: "Build a complete, professionally designed interactive presentation or e-learning lesson in uPresenter from a topic, outline, or source material, starting from the app's gallery of designed templates (listTemplates, getTemplateLayouts, insertTemplateSlides) or, on request, designing it from scratch on a blank deck (own theme, colors and fonts, composed layouts). Builds both kinds of presentation: fixed slides, and fluid ones (a scrolling, responsive document of cards). Use when the user wants to create or draft slides, a lesson, a lecture, a pitch, a report or a training module in uPresenter, or asks Claude/ChatGPT to \"make a presentation about ...\" in their uPresenter account, in any language (for example tạo bài giảng về ..., tạo presentation fluid về ..., crear una presentación sobre ..., 做一个关于...的演示文稿, créer une présentation sur ...)."
 ---
 
 # Create a presentation in uPresenter
@@ -9,296 +9,212 @@ uPresenter is a web editor for interactive presentations and e-learning. It has 
 **templates**: each one a design language (theme with colors and fonts, plus a library of layouts
 in that style). This skill builds a deck the way a template is built, with real content instead of
 placeholders: choose the design language, set the deck's style, plan only the slides the request
-needs, insert the matching layouts, then replace every placeholder with real content. The
-result should be a deck the user would be proud to present: accurate content, one visual identity,
-a clear structure, and interactivity where it helps learning.
+needs, insert the matching layouts, then replace every placeholder with real content. The result
+should be a deck the user would be proud to present: accurate content, one visual identity, a clear
+structure, and interactivity where it helps learning.
 
-The two rules that make the difference between a designed deck and "text on a background":
+Two rules make the difference between a designed deck and "text on a background":
 
-1. **The design comes from a template**, not from styling blank slides. Never restyle what a
-   layout already does.
+1. **The design comes from a template**, not from styling blank slides. Start every deck, and every
+   extra slide, from `listTemplates` / `getTemplateLayouts` / `insertTemplateSlides`; compose by
+   hand only what no layout carries. Never restyle what a layout already does.
 2. **The content comes from the request**, not from the template. The user's prompt decides which
-   slides exist and what they say. Insert only the layouts the outline needs, never the whole
-   library, and leave no sample text behind.
+   slides exist and what they say. Insert only the layouts the outline needs, and leave no sample
+   text behind.
 
-## How the tools work (read once)
+## Ground rules
 
-- Editing tools act on a presentation **open in an editor tab of the user's browser**. The tab runs
-  every call, so it must stay open for the whole build, and the user should not click around in it
-  meanwhile (a click changes the current slide and later edits land elsewhere).
-- Tools that read or list (`listPresentations`, `listTemplates`, `getTemplateLayouts`,
-  `getNewPresentationLink`, `listOpenEditorContexts`) work without an editor.
-- Call tools **one at a time**, never in parallel, and use the ids returned by earlier calls.
-  Shape ids are unique only within a slide and repeat on every slide: pass `slideId` and `shapeId`
-  together to every tool that names a shape, both taken from tool results, never guessed.
-- What the tools cannot do: animations, slide transitions, narration, music and exports (SCORM,
-  PDF, video). Templates bring their own animations and transitions. When a request
-  needs one of these, build the rest and tell the user to add it in the editor.
-- If a call fails with "No presentation is open in an editor tab", ask the user to open the
-  presentation and retry. Do not try again in a loop.
+- Editing tools act on a presentation **open in an editor tab** of the user's browser. The tab runs
+  every call: keep it open for the whole build and ask the user not to click around in it (a click
+  changes the current slide). If a call says "No presentation is open in an editor tab", ask the
+  user to open it and retry once; no loops.
+- Call tools **one at a time**, never in parallel, using ids from earlier results. Shape ids repeat
+  on every slide: pass `slideId` and `shapeId` together, both taken from tool results. `add*`
+  tools insert into the current slide (`goToSlide` first).
+- Not possible with the tools: animations, slide transitions, narration/TTS, music generation and
+  exports (SCORM, PDF, video). Templates bring their own animations and transitions. Build the rest
+  and tell the user to add these in the editor.
+- Fluid is a different kind of deck: never turn a slide deck into fluid with `setLayoutType`
+  (`references/fluid.md`).
+- Review with `reviewSlides` and `getSlideImage` before reporting (step 9).
+- Tool names and arguments: `references/tools.md`. Problems: `references/troubleshooting.md`.
+- If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
+  `describeTool` and run it with `callTool`.
 
 ## Workflow
 
 ### 1. Brief
 
 Work out: topic and source material (a document the user pasted, or your own knowledge), audience
-and level, language (the deck's language is the language the user writes in, unless they say
-otherwise), purpose (live lecture, self-paced lesson, assessment, pitch, report), the
-length the user asked for, and the mood if they gave one. Infer sensible defaults and ask only what
-would really change the deck. Content accuracy matters more than anything else: if the user gave a
-source, stay faithful to it.
+and level, language (the language the user writes in, unless they say otherwise), purpose (live
+lecture, self-paced lesson, assessment, pitch, report), the length asked for, and the mood. Infer
+sensible defaults and ask only what would really change the deck. Content accuracy matters most:
+stay faithful to a given source.
 
-**Decide the kind of presentation from the words of the request.** uPresenter has two kinds and
-they are built differently: **slides** (fixed 16:9 pages, the default) and **fluid** (a scrolling,
-responsive document made of cards, for phones and reading). If the user asks for a fluid
-presentation (fluid, scrolling, responsive, mobile-first, document-like, "dạng cuộn", "kiểu
-fluid", in any language), **it is a fluid presentation: read `references/fluid.md` now and follow
-it where this file differs**. The differences are: `listTemplates {layoutType: "fluid"}` in step
-2, a link that creates a fluid deck in step 4, cards instead of slides in step 3, no `maxChars`.
-Never take a slide template and switch it with `setLayoutType`: that leaves a fixed slide deck
-under a different name, which is exactly what the user did not ask for. When the request does not
-say, build slides.
+**Decide the kind from the words of the request.** uPresenter has **slides** (fixed 16:9 pages, the
+default) and **fluid** (a scrolling, responsive document of cards, for phones and reading). If the
+user asks for fluid, scrolling, responsive, mobile-first or document-like ("dạng cuộn", "kiểu
+fluid", in any language), **read `references/fluid.md` now and follow it where this file differs**:
+`listTemplates {layoutType: "fluid"}`, a link that creates a fluid deck, cards instead of slides,
+no `maxChars`. When the request does not say, build slides.
+
+For a full game build (lives, timer, boards, escape room) use the `build-game` skill if installed,
+otherwise `references/games.md`. For a quiz-heavy deck follow `create-quiz`.
 
 ### 2. Choose the design language: pick a template
 
-**Two ways to the design.** By default the design comes from a gallery template (this step and
-steps 4 to 7). **Design from scratch** instead when the user asks for it (start from a blank
-deck, "design it yourself", their brand colors and fonts, no template), or when the style they
-want has no template and they do not want the nearest one: then follow
-`references/design-from-scratch.md` (a design language turned into a theme with `createTheme`, a
-planned layout suite, every slide composed and checked by eye) in place of steps 2 and 4 to 7,
-and come back for steps 8 to 10.
+Every template is one **design language**: a theme (colors and fonts) plus a library of layouts in
+that style. Choosing it comes first, before any slide exists.
 
-Every template is one **design language**: a theme (colors and fonts, what the Design tab
-holds) plus a library of layouts drawn in that style ("Swiss Editorial", "Duotone Mono",
-"Warm Classroom"...). Choosing the language comes first, before any slide exists.
+1. Pick the style the request calls for (`references/styles.md`: topic to style), then
+   `listTemplates` with a `query` for the style, genre or topic ("Swiss Editorial", "pitch",
+   "lesson", "report"). Filters: `query` searches name, description and categories; `category`
+   takes only a gallery category (Business, Education, Game, Quiz, Healthcare, Nonprofit, Design,
+   Marketing, Travel); `language` matches the deck's language; `layoutType` is `slide` (default) or
+   `fluid`. The gallery has about forty templates and a call shows 20 at most: compare `total` with
+   what came back and narrow the search rather than judging the first page. Read each result's
+   `description`, `categories`, `layouts` (tag counts), `language`, `palette` and `fonts`. The tags
+   the plan needs must exist: a `timeline`, a `chart`, `list-5`, the `question-*` types of a quiz. A
+   template with `variableCount` above zero is a game template: its ordinary layouts serve any deck
+   in that look, its game screens are for games.
+2. **Suggest, do not just pick.** Shortlist two or three templates in one short message: name, what
+   it looks like (from `description`, `palette`, `fonts`), why it suits this request, which planned
+   layouts it has, and its `previewUrl`. As the **last option** offer to **design it from scratch on
+   a blank deck**: name the design language you would use (`references/styles.md`,
+   `references/design-systems.md`) with palette and fonts, say the user may give their own brand
+   colors and fonts, and that it takes longer. Say which you recommend, ask, and **wait for the
+   answer** before any editing call. Skip the question only when the user already named a template or
+   style, asked for a blank or custom design, or asked you to choose: then pick one and say which and
+   why in one line.
+3. **One template for the whole deck.** No template in the wanted style: offer the nearest or borrow
+   a theme and compose (`references/styles.md`, section 4). If nothing fits, relax the filters
+   (legacy packs: `includeLegacy: true`, no theme of their own). Last resort: blank slides
+   (`references/build-from-blank.md`).
+4. **Design from scratch** (the user's choice, a brand kit, or a style with no template):
+   `references/design-from-scratch.md` replaces steps 2 and 4 to 7 (a design language turned into a
+   theme with `createTheme`, a planned layout suite, every slide composed and checked by eye); then
+   continue at step 8.
 
-1. Choose the style the request calls for (`references/styles.md`: topic to style, and the
-   search that finds each style), then `listTemplates` with a `query` for the style, genre or
-   topic ("Swiss Editorial", "pitch", "lesson", "report"). `category` takes only a gallery
-   category (Business, Education, Game, Quiz...). (It lists slide templates; add `layoutType:
-   "fluid"` for a fluid presentation, `references/fluid.md`.) The gallery has about forty
-   templates and a call shows 20 at most: compare `total` with what came back and narrow the
-   search rather than judging from the first page. Read each result's `description`,
-   `categories`, `layouts` (tag counts), `language`, `palette` and `fonts`. The tags the plan
-   needs must exist in the template: a `timeline`, a `chart`, `list-5`, the `question-*` types of
-   a quiz. A template with `variableCount` above zero is a game template: its ordinary layouts
-   serve any deck in that look, its game screens are for games (`references/games.md`).
-2. **Suggest, do not just pick.** Shortlist two or three templates and put them to the user in one
-   short message: for each its name, what it looks like in a few words (from `description`,
-   `palette` colors and `fonts`), why it suits this request, which of the layouts the plan needs it
-   has, and its `previewUrl` so the user can look at every slide. Then, as the **last option**,
-   offer to **design it from scratch on a blank deck**: name the design language you would use for
-   this topic (`references/styles.md`, `references/design-systems.md`) with its palette and fonts in
-   a few words, say that the user may give their own brand colors and fonts instead, and that it
-   takes longer than a template. Say which option you recommend and ask which to use. **Stop and
-   wait for the answer** before any editing call. Skip the question only when the user already
-   named a template or style, asked for a blank or custom design, or asked you to choose for them:
-   then pick one and say which and why in one line. If the user picks the blank option, follow
-   `references/design-from-scratch.md` (its step 1 is already agreed).
-3. **One template for the whole deck.** If the wanted style has no template, offer the nearest
-   one or borrow a theme and compose (`references/styles.md`, section 4). If nothing fits at
-   all, relax the filters; legacy packs (`includeLegacy: true`) have no theme of their own. As a
-   last resort build from blank slides with `references/build-from-blank.md`.
-
-Details on reading templates and tags: `references/template-layouts.md`.
+Reading templates and tags: `references/template-layouts.md`.
 
 ### 3. Plan the deck: only the slides the prompt needs
 
-Write the outline before any editing call. One line per slide: the **message** (what the viewer
-should take away), the **layout tag** that carries it, and the **real content** in short form
-(the numbers, names, steps and sentences you will use).
+Write the outline before any editing call. One line per slide: the **message**, the **layout tag**
+that carries it, and the **real content** in short form (numbers, names, steps, sentences).
 
-- Length: the user's number if they gave one; otherwise the genre default in
-  `references/deck-genres.md`, trimmed to what the content needs. A lesson defaults to 12-16
-  slides, a pitch to 10-12.
-- Start from the genre's running order, **drop what the brief does not need, add what it does**.
-  Do not add slides to show off layouts.
+- Length: the user's number, else the genre default in `references/deck-genres.md`, trimmed to the
+  content (a lesson 12-16 slides, a pitch 10-12). Start from the genre's running order, drop what
+  the brief does not need, add what it does. No slides just to show off layouts.
 - Choose each tag by the **shape of the content** (`template-layouts.md`, section 2): three parallel
-  points are a `list-3`, a sequence in time a `timeline`, figures a `chart` or `statistic`, two
-  options a `comparison`, a question a `question-*`. A chart, timeline, statistic or quote needs
-  real data: if you have none, use a text layout.
+  points `list-3`, a sequence `timeline`, figures `chart` or `statistic`, two options `comparison`, a
+  question `question-*`. Charts, timelines, statistics and quotes need real data; with none, use a
+  text layout.
 - Rhythm: a cover first and an `end` last; no two slides with the same tag in a row; a `section`
   divider only in decks of ten or more slides.
-- For math, physics or chemistry content, plan the formulas now: which equation each slide shows,
-  written as LaTeX (`references/math-formulas.md`), one idea and one or two large formulas per slide.
-- Make the content real and specific: concrete numbers, names and examples from the source or
-  your knowledge, headlines that state a claim ("Revenue grows 4.5x in three years"), not topic
-  labels ("Revenue").
+- Math, physics, chemistry: plan each slide's formulas as LaTeX (`references/math-formulas.md`).
+- Be specific: concrete numbers, names and examples; headlines that state a claim ("Revenue grows
+  4.5x in three years"), not labels ("Revenue").
 
 ### 4. Open the deck and set its style
 
-A deck made with "Create Blank" is not empty of design: it starts from a template of its own
-(the dialog preselects one) with that template's theme and a starter cover. So whatever deck the
-user has, set the style first, then build.
+A deck made with "Create Blank" is not empty of design: it starts from a template of its own with
+that template's theme and a starter cover. So set the style first, then build.
 
-1. `listOpenEditorContexts`. If the user has a deck open, use it. If none is open,
-   `getNewPresentationLink` with the `templateId` of the chosen template gives the user a link:
-   opening it **creates a presentation from the template** (a fluid one for a fluid template) and
-   opens it in the editor. Ask them to
-   keep that tab open, then call `listOpenEditorContexts` again. If several editors are open, pass
-   the `sessionId` of the right one to every editing tool.
-2. `getPresentationInfo` shows the deck's `layoutType` (`slide` or `fluid`, which must be what the
-   request asked for), its `templateId` (the template it was created from) and its `themeId`
-   (the style it wears now). If the `themeId` is **not** the chosen template's `themeId` (from
-   `listTemplates`), switch the deck's style: `insertTemplateSlides {templateId: <chosen>, applyThemeFromTemplate:
-   true}` with no `slides` changes only the theme (colors and fonts of every slide), like picking a
-   theme in the Design tab. Do it before building, so everything that follows already has the
-   chosen look. Pass the chosen `templateId` in **every** `insertTemplateSlides` call: without it
-   the tool uses the deck's own starter template.
-3. `getPresentationState` with `scope: "all_slides"` shows the starter slide. If the deck's own
-   template is the chosen one, keep its cover and fill it. Otherwise it belongs to the other
-   template: you will insert the chosen template's `title` layout at index 0 and delete the
-   starter slide with `deleteSlide`.
-4. Call `setPresentationName` and `setPresentationLanguage` with the language of the deck, as one of
-   the codes in the `localize-presentation` skill's `references/locales.md` (for example `vi-VN`,
-   `en-US`). The presentation language also sets the player's buttons, the date format and, for
-   Arabic, Hebrew, Persian and Urdu, the text direction.
+1. `listOpenEditorContexts`. If the user has a deck open, use it. If none, `getNewPresentationLink`
+   with the chosen `templateId`: opening it **creates a presentation from the template** (a fluid
+   one for a fluid template). Ask the user to keep that tab open, then call
+   `listOpenEditorContexts` again. With several editors open, pass the right `sessionId` to every
+   editing tool.
+2. `getPresentationInfo` shows `layoutType` (must match the request), `templateId` (what the deck was
+   created from) and `themeId` (the style it wears now). If `themeId` is **not** the chosen
+   template's `themeId` (from `listTemplates`), call `insertTemplateSlides {templateId: <chosen>,
+   applyThemeFromTemplate: true}` with no `slides`: it changes only the colors and fonts of every
+   slide. Do it before building. Pass the chosen `templateId` in **every** `insertTemplateSlides`
+   call; without it the tool uses the deck's own starter template.
+3. `getPresentationState {scope: "all_slides"}` shows the starter slide. If the deck's template is the
+   chosen one, keep its cover and fill it; otherwise insert the chosen `title` layout at index 0 and
+   `deleteSlide` the starter.
+4. `setPresentationName` and `setPresentationLanguage` with the deck's language code
+   (`references/language-codes.md`, for example `vi-VN`, `en-US`). The language sets the player's
+   buttons, date format and, for Arabic, Hebrew, Persian and Urdu, the text direction.
 
 ### 5. Read the layouts and pick slides
 
-`getTemplateLayouts {templateId}` once, then choose for every planned slide a concrete `slideId`:
-among variants with the same tag take the one whose `maxChars` budgets hold your text, and vary
-the variants when a tag repeats (`template-layouts.md`, section 5).
+`getTemplateLayouts {templateId}` once, then choose a concrete `slideId` for every planned slide:
+among variants with the same tag take the one whose `maxChars` budgets hold your text, and vary the
+variants when a tag repeats (`template-layouts.md`, section 5).
 
 ### 6. Insert the planned layouts
 
-`insertTemplateSlides {templateId, slides: [{slideId}, ...], index}` inserts the layouts in one
-call, in the planned order, at an exact position (`index` is the position of the first one). A
-`tag` instead of a `slideId` takes the first slide with that tag. Insert at index 0 when the
-starter cover is replaced, otherwise after the kept cover (index 1), then delete the starter slide
-if there is one. Each result lists the new slides with their `slideId`, `slideIndex` and `slots`
-(the shapes to fill: `shapeId`, `role`, `maxChars`, `prompt` or `sample`), plus `chartShapeId`,
-`tableShapeId`, `questionShapeId`, `entryCount` and `imageSlots` where the layout has them. A cover
-you kept was not inserted by you: `goToSlide`, then `getPresentationState` with `scope:
-"current_slide"` lists its text shapes (`placeholder`, `maxChars`).
+`insertTemplateSlides {templateId, slides: [{slideId}, ...], index}` inserts all layouts in one call,
+in the planned order, at an exact position (`index` = position of the first). A `tag` instead of a
+`slideId` takes the first slide with that tag. Insert at index 0 when the starter cover is replaced,
+otherwise at index 1 after the kept cover, then delete the starter if needed. Each result lists the
+new slides with `slideId`, `slideIndex` and `slots` (`shapeId`, `role`, `maxChars`, `prompt` or
+`sample`) plus `chartShapeId`, `tableShapeId`, `questionShapeId`, `entryCount` and `imageSlots`. A
+cover you kept was not inserted by you: `goToSlide`, then `getPresentationState {scope:
+"current_slide"}` lists its text shapes.
 
 ### 7. Fill every slot with real content
 
-Slide by slide, in order. For every slot of every inserted slide:
+Slide by slide, for every slot of every inserted slide:
 
-- `setShapeText {slideId, shapeId, text}` with the real text, **within `maxChars`**. Follow the
-  slot's `role` and `prompt` (`template-layouts.md`, section 3): a `label` is 1-3 words, a `title`
-  is a claim, an `item-title` a few words, an `item-content` one or two sentences.
-- A `chart` layout: `setChartData` with the real labels and numbers, then the insight text.
-- Slots with a `sample` (figures, labels, timeline and process entries `entry-*`): overwrite every
-  one. Sample copy looks real and is not marked as a placeholder, so skipping it leaves the
-  template's figures in your deck.
-- Tables: `editTableStructure` to the shape of your data, then `setTableCellsText`. Questions: `setQuestionAnswers` and
-  `setQuestionSettings` (the `create-quiz` skill). Images: keep the template's sample picture, or
-  `replaceImage` with a real public HTTPS URL the user gave you; never invent URLs. A sample
-  picture that shows the wrong subject (a laptop on a slide about rice farming) misleads: ask the
-  user for pictures up front when the deck needs them, prefer a variant without picture slots,
-  or use an icon. When the connection offers `generateShapeImage`, new pictures can fill the
-  slots: see `references/template-layouts.md`, section 4, for the cost agreement, the model and
-  how to prompt.
-- A slot the content has no use for: `deleteShape {slideId, shapeId}`, rather than leaving the
-  prompt visible.
-- A slide no layout of the template carries (a results slide, a reveal activity, a media slide, a
-  game screen): compose it with `references/composed-slides.md`. In a deck made from a template
-  shapes added without its skeleton land on top of each other.
-- **Math is a formula, never plain characters.** Every equation, power, fraction, root, symbol or
-  derivation goes into the text as `[[katex:LATEX]]`, for example `Expand [[katex:(a+b)^2]]`. Typing
-  `x^2`, `x²` or `1/2` as plain text is wrong. Syntax, where it works and the pitfalls:
-  `references/math-formulas.md` (read it before any slide with math).
-- **Language:** write all text in the deck's language, including quiz feedback (the defaults are
-  English, `create-quiz`). Non-English text runs longer than English (Vietnamese, French, German,
-  Spanish and Russian by 10-30%), so shorten rather than overflow; Chinese, Japanese and Korean use
-  about half the characters. When the language uses a script other than Latin, or Vietnamese
-  accents, check in the slide picture that the template's fonts have the letters
-  (`localize-presentation`, `references/locales.md`).
+- `setShapeText {slideId, shapeId, text}` with real text **within `maxChars`**, following the slot's
+  `role` and `prompt` (`template-layouts.md`, section 3): a `label` is 1-3 words, a `title` a claim,
+  an `item-title` a few words, an `item-content` one or two sentences.
+- **Sample text is not a placeholder.** Slots with a `sample` (figures, labels, `entry-*` timeline
+  and process entries, chart titles, table cells) look like real copy; every one must be replaced
+  or deleted, or the template's figures stay in the deck.
+- `chart` layout: `setChartData` with real labels and numbers, then the insight text. Tables:
+  `editTableStructure` to the shape of the data, then `setTableCellsText`. Questions:
+  `setQuestionAnswers` and `setQuestionSettings` (`create-quiz`).
+- Images: keep the template's sample picture, or `replaceImage` with a real public HTTPS URL the
+  user gave; never invent URLs. A sample picture of the wrong subject misleads: ask for pictures up
+  front, prefer a variant without picture slots, or use an icon. When the connection offers
+  `generateShapeImage`, see `template-layouts.md`, section 4 (cost agreement, model, prompts).
+- A slot the content has no use for: `deleteShape {slideId, shapeId}`.
+- A slide no layout carries (results, reveal activity, media, game screen): compose it with
+  `references/composed-slides.md`; shapes added in a template deck without its skeleton land on top
+  of each other.
+- **Math is a formula, never plain characters**: `[[katex:(a+b)^2]]`, never `x^2`, `x²` or `1/2`
+  (`references/math-formulas.md`; read it before any math slide).
+- **Language:** all text, including quiz feedback (default English), in the deck's language.
+  Vietnamese, French, German, Spanish and Russian run 10-30% longer than English: shorten rather
+  than overflow; Chinese, Japanese and Korean use about half the characters. For non-Latin scripts
+  or Vietnamese accents, check in the slide picture that the template's fonts have the letters
+  (`localize-presentation` skill, if installed).
 - Do not touch colors, fonts or sizes. If the layout cannot hold the content, change the layout
   (another variant or tag), not the styling.
 
-Check as you build: after filling a slide, or a few slides, run `reviewSlides {slideIds: [...]}`
-(step 9) and fix what it reports before moving on, so mistakes do not pile up.
-
-If a call fails, read the error and fix the call. Do not retry the same arguments.
+After a slide or a few slides, run `reviewSlides {slideIds: [...]}` and fix what it reports before
+moving on. If a call fails, fix the call; do not retry the same arguments.
 
 ### 8. Interactivity and quizzes (when it helps learning)
 
-- Reveals, tabs, flip cards, tooltips, hotspots on a picture, media and narrated slides:
-  `references/interactions.md`.
-- Quiz questions use the template's `question-*` layouts: follow the `create-quiz` skill (score,
-  branching on the score, results slide). For graded e-learning also set
-  `setCompletionCriteria`, `setSuccessCriteria`, `setMaxAttempts` and `setResumeOption`.
-- Games (quiz shows with lives, Jeopardy boards, escape rooms, dice, branching stories):
-  `references/games.md`, which also says how to use the game templates.
+- Reveals, tabs, flip cards, tooltips, hotspots, media and narrated slides:
+  `references/interactions.md` (or the `design-interactions` skill if installed).
+- Quiz questions use the template's `question-*` layouts: follow `create-quiz` (score, branching,
+  results). For graded e-learning also `setCompletionCriteria`, `setSuccessCriteria`,
+  `setMaxAttempts`, `setResumeOption`.
+- Games (lives, Jeopardy boards, escape rooms, dice, branching stories): the `build-game` skill if
+  installed, else `references/games.md`.
 
-Interactive slides need room for their buttons and panels: compose them with the skeleton in
+Interactive slides need room for buttons and panels: use the skeleton in
 `references/composed-slides.md`.
 
 ### 9. Review the result and fix it
 
-Never report a deck you have not reviewed. `reviewSlides` measures how each slide really renders
-and returns the problems; `getSlideImage` shows you the slide as a picture; `getPresentationState`
-and `getQuestionsInfo` check the content.
-
-In a fluid presentation the "slides" are cards, which grow with their content: text cannot run
-past the edge of a card's slide, but it can still spill out of its own box or an inner card, and
-`getSlideImage` draws one whole card, as tall as it is. See `references/fluid.md`, section 7.
-
-1. `reviewSlides {}` for the whole deck. It reviews up to 40 slides per call: while the result has
-   `remaining`, call it again with those `slideIds`. Each issue has a `kind`, the `shapeId` and, for spills, `spillPx` (how far, in
-   pixels):
-
-   | kind | What is wrong | Fix |
-   |---|---|---|
-   | `placeholder` | A slot still shows its prompt | `setShapeText` with the content, or `deleteShape` |
-   | `spillsOutOfBox`, `outsideCard` | Text runs past its own box or the card it sits in | Shorten the text (keep it within `maxChars`, and shorter in languages with long words), or move the slide to a variant with a bigger budget; `setTextStyle` with a smaller size only as a last resort and never below about 75% |
-   | `outsideSlide` | Text runs past the edge of the slide | Same, and if the content is too much for one slide, split it into two slides |
-   | `overlapsText` | Two texts lie on top of each other (`shapeId`, `otherShapeId`) | Shorten the longer one or choose another layout |
-   | `plainMath` | Math typed as plain characters | Rewrite it as `[[katex:LATEX]]` (`references/math-formulas.md`) |
-
-2. Fix the issues, then `reviewSlides {slideIds: [the problem slides]}` again. Repeat until the
-   slides are clean, at most three rounds. Tell the user about anything you could not fix.
-3. **Look at the slides.** Measuring cannot judge a design, so call `getSlideImage {presentationId,
-   slideId}` and look at the picture, slide by slide (every slide up to about 15; in a longer deck
-   one slide of each layout plus every slide you changed). The `presentationId` is in
-   `listOpenEditorContexts`. Ask of each picture: is all text readable and fully inside its card;
-   is there enough contrast (light text on a light picture is a fault); do formulas show as
-   typeset math; are there empty areas, crowded areas or clashing pictures; does the slide look
-   like the others; does a sample picture show the wrong subject; does a chart still carry a
-   sample title or legend; does any leftover sample figure or label remain? Fix what you see and look again. The picture shows the saved state, so look
-   again after your edits. If `getSlideImage` reports it cannot draw the slide, carry on with the
-   measured review and the content checks.
-4. Content checks with `getPresentationState` (`scope: "all_slides"`) and `getQuestionsInfo
-   {scope: "all-slides", includeAnswers: true}` (without `scope` it reads only the current slide):
-   - no figure, label, table cell or timeline entry still holds the template's sample (read the
-     texts of each slide: dates, percentages and numbers from the sample must match your content);
-   - every text fits its `maxChars`; the headline of each slide states its message;
-   - the order matches the outline; every graded question has a correct answer;
-   - no two neighbouring slides repeat the same layout without a reason;
-   - interactions and variables are wired as planned (`getInteractions {slideId}`,
-     `getVariables`): the tools cannot play the deck, so check the wiring.
+Run the loop in `references/review-loop.md`: `reviewSlides {}` until clean (up to 40 slides per call,
+follow `remaining`), `getSlideImage {presentationId, slideId}` for each slide (up to about 15, else
+one per layout plus every changed slide), then the content checks (no leftover sample text, texts
+within `maxChars`, order matches the outline, every graded question has a correct answer,
+interactions wired). Fix and look again.
 
 ### 10. Report
 
-Tell the user, one line per slide, what was created and which template was used; that the deck was
-reviewed and what you fixed; which features were used (charts, questions, interactions); and
-anything that needs their input: problems you could not fix, facts to confirm,
-pictures to replace (list the slides whose sample picture stays), pictures you generated and the
-credits left, accents to check in a non-English deck, interactions and games to test in the player
-(the tools cannot play them), and what was asked but is not possible with the tools (animations,
-transitions, narration, music). Suggest next steps: preview in the player, share,
-export for an LMS, or restyle with another template.
-
-## Troubleshooting
-
-| Symptom | Fix |
-|---|---|
-| "No presentation is open in an editor tab" | Ask the user to open the presentation and keep the tab open. |
-| "More than one editor tab is open" | Call `listOpenEditorContexts` and pass the `sessionId`. |
-| `listTemplates` returns nothing | `category` takes only a gallery category: put genre and mood words in `query`. Widen `language`, or search the style (`references/styles.md`). |
-| The wanted style has no template | Offer the nearest template, or borrow a theme and compose (`references/styles.md`, section 4). |
-| The user asked for a fluid presentation and the deck is `slide` | Do not convert it with `setLayoutType`. Pick a fluid template (`listTemplates {layoutType: "fluid"}`) and give the user its `getNewPresentationLink`: the new presentation is fluid. |
-| `insertTemplateSlides` says the template is a slide (or fluid) template | The template and the deck are of different kinds: use a template of the deck's kind, or open a new deck of the kind you need. |
-| `insertTemplateSlides` says a slide was not found | Take the `slideId` or `tag` from `getTemplateLayouts` of the same template. |
-| The inserted slides look different from the rest | The deck's style and the layouts come from different templates. Switch the style with `insertTemplateSlides {templateId, applyThemeFromTemplate: true}` (no slides) and pass the chosen `templateId` on every insert. |
-| A slide still shows "Click to add title" | A slot was not filled: fill it or `deleteShape` it, then audit again. |
-| Text spills out of its card | `reviewSlides` names the shape and how far it spills: shorten the text to the slot's `maxChars`, or move the slide to a variant with a larger budget. |
-| Edit landed on the wrong slide | A shape id was passed without its `slideId`. Pass `slideId` and `shapeId` every time; inserts (`add*`) go to the current slide, so `goToSlide` first. |
-| Added shapes lie on top of each other | The deck is freeform (made from a template). Build the slide with the skeleton in `references/composed-slides.md`. |
-| `getTemplateLayouts` says the deck's own template is not available | It was taken out of the gallery: insert its layouts by `tag` without `templateId`. |
-| "Editor tool execution timed out" | Check the state before retrying so nothing is inserted twice. |
-| Bad argument errors | Read the tool's schema in the tool list and fix the arguments. |
+One line per slide with the template used; that the deck was reviewed and what you fixed; features
+used; and what needs the user: unfixed problems, facts to confirm, pictures to replace, generated
+pictures and credits left, accents to check, interactions and games to test in the player, and what
+was asked but is not possible (animations, transitions, narration, TTS, exports). Details:
+`references/review-loop.md`. Suggest next steps: preview in the player, share, export for an LMS
+from the editor, or restyle with another template.

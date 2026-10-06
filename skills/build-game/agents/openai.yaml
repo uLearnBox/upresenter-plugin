@@ -1,0 +1,16 @@
+interface:
+  display_name: "Build game"
+  short_description: "Make quiz-show and escape-room games"
+  brand_color: "#6655F0"
+  default_prompt: "Build a quiz-show game with a timer and 3 lives in my open presentation."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

@@ -1,0 +1,28 @@
+{
+  "name": "upresenter",
+  "description": "uPresenter plugin for Claude Code: build and edit interactive presentations, lessons, quizzes and games.",
+  "owner": {
+    "name": "uLearnBox",
+    "url": "https://upresenter.ai"
+  },
+  "plugins": [
+    {
+      "name": "upresenter",
+      "source": "./",
+      "description": "Build and edit interactive presentations, lessons, quizzes and games in your uPresenter account.",
+      "homepage": "https://upresenter.ai",
+      "category": "productivity",
+      "tags": [
+        "presentations",
+        "slides",
+        "e-learning",
+        "quiz",
+        "games",
+        "lessons",
+        "fluid",
+        "education",
+        "uPresenter"
+      ]
+    }
+  ]
+}
