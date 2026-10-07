@@ -12,6 +12,20 @@ set up the player. Compose a screen by hand only when no template screen fits.
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - Call tools one at a time. Pass `slideId` with every `shapeId` (shape ids repeat on every slide)
   and use ids that tool results returned.
 - The editor tab must be open: `listOpenEditorContexts`; if none, `getNewPresentationLink` (with
@@ -22,8 +36,7 @@ set up the player. Compose a screen by hand only when no template screen fits.
 - A game is a **slide** presentation. Fluid decks (scrolling cards) come only from fluid templates
   and are not for games; never convert with `setLayoutType`.
 - The tools build a game but cannot play it. Say what you could not test.
-- Not available as tools: animations, slide transitions, narration or TTS, export, classes,
-  reports, music generation. Point the user to the editor for these.
+- Not available as tools: narration or TTS (only when the connection lists `addNarration`), export, classes, reports, music generation. Point the user to the editor for these.
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
   `describeTool` and run it with `callTool`.
 

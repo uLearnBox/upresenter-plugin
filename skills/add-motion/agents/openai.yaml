@@ -1,0 +1,16 @@
+interface:
+  display_name: "Add motion"
+  short_description: "Add slide transitions and shape animations"
+  brand_color: "#6655F0"
+  default_prompt: "Add a calm transition between all slides of my open presentation and fade in the title on slide 1."
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "upresenter"
+      description: "uPresenter MCP server"
+      transport: "streamable_http"
+      url: "https://mcp.upresenter.ai/mcp?tools=lean"

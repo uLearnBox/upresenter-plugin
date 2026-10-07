@@ -10,6 +10,20 @@ unless they ask for a change.
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - A presentation must be **open in an editor tab** and stay open; ask the user not to click around
   in it (a click changes the current slide and later edits can land elsewhere). "No presentation is
   open in an editor tab" means: ask them to open it, then retry once.
@@ -19,7 +33,21 @@ unless they ask for a change.
 - A new slide starts from a **template layout** (`listTemplates`, `getTemplateLayouts`,
   `insertTemplateSlides`), not from a blank slide; compose by hand only what no layout carries.
 - After every change run `reviewSlides {slideIds: [...]}` and look with `getSlideImage`.
-- Not possible with the tools: animations, slide transitions, narration/TTS, exports. Say so and
+- Animations and slide transitions: `setShapeAnimation` and `setSlideTransition` (the `add-motion`
+  skill plans them); read what is set with `getSlideInfo` and `getPresentationState`. Playback of
+  audio and video (loop, autoplay, controls): `setMediaPlayback`. `setShapeLocked` guards backgrounds
+  and frames against accidental drags in the editor; tools can still change a locked shape.
+- Reviewer feedback: `getComments` lists the threads (`includeResolved: false` for the open ones).
+  Do what each asks with the normal tools, `replyToComment` to say what you changed, then
+  `resolveComment`. Leave a thread open and reply with a question when the request is unclear.
+  Comments are written under the user's name; say "from the assistant" in the text.
+- Reuse files already in the deck with `listResources` (its `source` goes to `addImage`,
+  `replaceImage`, `addAudio`...) before uploading anything again.
+- Grouping: `groupShapes` / `ungroupShape`; infographic length: `setInfographicItemCount`.
+- Copying: only `duplicateSlide` and `duplicateShape` exist (they return no id; read the deck
+  again). There is no deck copy, no slide import from another deck and no .pptx import: for a
+  second version of a whole deck the user duplicates it in the dashboard, then you edit the copy.
+- Not possible with the tools: version history and restoring versions (use `undo`), speaker notes, image alt text, exports. Say so and
   point the user to the editor.
 - Fluid decks: never convert with `setLayoutType`; see `create-presentation` `references/fluid.md`.
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with

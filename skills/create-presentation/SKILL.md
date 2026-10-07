@@ -24,6 +24,20 @@ Two rules make the difference between a designed deck and "text on a background"
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - Editing tools act on a presentation **open in an editor tab** of the user's browser. The tab runs
   every call: keep it open for the whole build and ask the user not to click around in it (a click
   changes the current slide). If a call says "No presentation is open in an editor tab", ask the
@@ -31,13 +45,19 @@ Two rules make the difference between a designed deck and "text on a background"
 - Call tools **one at a time**, never in parallel, using ids from earlier results. Shape ids repeat
   on every slide: pass `slideId` and `shapeId` together, both taken from tool results. `add*`
   tools insert into the current slide (`goToSlide` first).
-- Not possible with the tools: animations, slide transitions, narration/TTS, music generation and
-  exports (SCORM, PDF, video). Templates bring their own animations and transitions. Build the rest
-  and tell the user to add these in the editor.
+- Not possible with the tools: music generation and exports (SCORM, PDF, video). Narration only
+  when the connection lists `addNarration` (AI voice, uses credits; see `references/tools.md`).
+  Animations and slide transitions are possible (`setShapeAnimation`, `setSlideTransition`; see
+  `references/tools.md`), and templates bring their own. Build the rest and tell the user to add the
+  others in the editor.
 - Fluid is a different kind of deck: never turn a slide deck into fluid with `setLayoutType`
   (`references/fluid.md`).
 - Review with `reviewSlides` and `getSlideImage` before reporting (step 9).
-- Tool names and arguments: `references/tools.md`. Problems: `references/troubleshooting.md`.
+- Tool names and arguments: `references/tools.md`. Problems: `references/troubleshooting.md`; the
+  rules behind refused calls: `references/pitfalls.md`.
+- Motion (slide transitions, shape animations, looping media): only when asked or when the genre
+  needs it; follow the `add-motion` skill. Phones: prefer a fluid deck, or a portrait
+  `setSlideSize`, and know that `getSlideImage` crops anything beyond 1920 x 1080.
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
   `describeTool` and run it with `callTool`.
 
@@ -82,8 +102,11 @@ that style. Choosing it comes first, before any slide exists.
    layouts it has, and its `previewUrl`. As the **last option** offer to **design it from scratch on
    a blank deck**: name the design language you would use (`references/styles.md`,
    `references/design-systems.md`) with palette and fonts, say the user may give their own brand
-   colors and fonts, and that it takes longer. Say which you recommend, ask, and **wait for the
-   answer** before any editing call. Skip the question only when the user already named a template or
+   colors and fonts, and that it takes longer. Say which you recommend and ask with the **choice picker** (Ground rules): one
+   question "Which design should I use?", the shortlisted templates as options (name and look in the
+   description, `previewUrl` included) and "Design from scratch" as the last option, the
+   recommendation first. In the same call you may ask the deck length or language when the prompt
+   leaves them open. **Wait for the answer** before any editing call. Skip the question only when the user already named a template or
    style, asked for a blank or custom design, or asked you to choose: then pick one and say which and
    why in one line.
 3. **One template for the whole deck.** No template in the wanted style: offer the nearest or borrow
@@ -215,6 +238,6 @@ interactions wired). Fix and look again.
 One line per slide with the template used; that the deck was reviewed and what you fixed; features
 used; and what needs the user: unfixed problems, facts to confirm, pictures to replace, generated
 pictures and credits left, accents to check, interactions and games to test in the player, and what
-was asked but is not possible (animations, transitions, narration, TTS, exports). Details:
+was asked but is not possible (exports, and narration when `addNarration` is not listed). Details:
 `references/review-loop.md`. Suggest next steps: preview in the player, share, export for an LMS
 from the editor, or restyle with another template.

@@ -7,7 +7,7 @@ Contents: 1 How to find them, 2 What the packs contain, 3 Reading and reusing a 
 - `listTemplates` takes `query` (text over name, description, categories), `category` (exactly one
   of Business, Education, Game, Quiz, Healthcare, Nonprofit, Design, Marketing, Travel, any case),
   `language` (of the sample copy), `layoutType` (`"slide"` default, `"fluid"`), `includeLegacy`
-  and `limit` (default 20, at most 50). Results are sorted by name and `total` says how many
+  and `limit` (default 20, at most 50). Results are sorted newest first and `total` says how many
   matched: compare it with the number returned.
 - The `layouts` field of each result counts slides per tag, so a template with a `flip cards` or
   `results` tag shows it there without another call.

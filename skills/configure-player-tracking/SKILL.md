@@ -10,6 +10,20 @@ This skill sets them with tools and explains the parts that only the user can do
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - Call tools one at a time and use ids that tool results returned.
 - The editor tab must be open: `listOpenEditorContexts`; if none, `listPresentations` for an
   existing deck or `getNewPresentationLink`, and ask the user to open it and keep the tab open,
@@ -20,7 +34,7 @@ This skill sets them with tools and explains the parts that only the user can do
 - Fluid decks (scrolling cards) come only from fluid templates; never convert with `setLayoutType`.
   Tracking settings work the same in both kinds.
 - **There are no MCP tools for** classes, assigning, reports, exporting packages (SCORM, xAPI,
-  HTML5, PDF, PowerPoint, images), animations, slide transitions or narration (TTS). Say so
+  HTML5, PDF, PowerPoint, images). Say so
   plainly and give the user the steps in the editor or dashboard (`references/tracking-and-export.md`).
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
   `describeTool` and run it with `callTool`.

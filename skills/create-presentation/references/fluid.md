@@ -40,8 +40,9 @@ this is a choice from a small set. For a different look there are two routes:
   cards follow the theme. Slide themes are not tuned for cards: look at the cards afterwards, and
   set a quiet page background around them with `setPresentationBackground` if the theme's is
   harsh.
-- **The user's own theme.** They create a blank fluid presentation themselves (Create Blank, Fluid
-  Layout, pick one of the themes). Then insert the cards of the closest fluid template into it
+- **The user's own theme.** Make a blank fluid presentation with `getNewPresentationLink {blank:
+  true, layoutType: "fluid", themeId}` (`listThemes` for the id; `createTheme` makes a new one), or
+  the user creates it (Create Blank, Fluid Layout, pick a theme). Then insert the cards of the closest fluid template into it
   **without** `applyThemeFromTemplate`: the cards take the deck's own theme.
 
 Do not build a whole fluid deck from blank shapes (`build-from-blank.md` is for slides); for the

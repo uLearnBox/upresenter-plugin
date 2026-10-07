@@ -47,7 +47,8 @@ is this?"; one `play-confetti` action after the last reveal.
 
 ## 3. Tabs
 
-Several buttons, each showing its own panel at the same place.
+Several buttons, each showing its own panel at the same place. Slide decks only: in a fluid deck
+use stacked reveals (a hidden block shown in place), because fluid cards do not allow overlap.
 
 1. A row of buttons, then one panel group per tab. Make the panels absolute at the same
    left/top/width/height (`setShapePositioningMode` + `setShapeCSSStyle`) so they overlap.
@@ -56,7 +57,7 @@ Several buttons, each showing its own panel at the same place.
 
 ## 4. Flip card
 
-Front and back at the same spot; a click turns the card.
+Front and back at the same spot; a click turns the card. Slide decks only (no overlap in fluid).
 
 1. Two groups, front and back, absolute at the same left/top/width/height; the back initially
    hidden.
@@ -108,8 +109,9 @@ Graded questions about a picture (geography, anatomy, machine parts):
 
 ## 9. Narrated slides
 
-The tools cannot record or synthesize narration. When the user has audio files (an HTTPS URL per
-slide), each slide gets `addAudio {source, autoplay: true, controls: false}` and a `media-ended`
+With `addNarration` (when the connection lists it) each slide's script becomes an audio shape;
+otherwise the tools cannot record or synthesize narration. With audio files (an HTTPS URL per
+slide) or generated narration, each slide gets `addAudio {source, autoplay: true, controls: false}` and a `media-ended`
 interaction on it with `next-slide`. Browsers block autoplay until the learner clicks once, so
-keep a visible Start or Next button on the first slide. Without audio files, tell the user that
+keep a visible Start or Next button on the first slide. Without audio files or `addNarration`, tell the user that
 narration can be added in the editor.

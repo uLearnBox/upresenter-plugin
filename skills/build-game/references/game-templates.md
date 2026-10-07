@@ -8,7 +8,7 @@ Contents: 1 Finding game templates, 2 The templates and their screens, 3 Choosin
   shows. `category` must equal a gallery category exactly (any case): Business, Education, Game,
   Quiz, Healthcare, Nonprofit, Design, Marketing, Travel. A genre word ("trivia") there matches
   nothing: use `query` for words, for example `query: "escape"` or `query: "jeopardy"`.
-- `limit` defaults to 20 (maximum 50) and results are sorted by name: compare `total` with the
+- `limit` defaults to 20 (maximum 50) and results are sorted newest first: compare `total` with the
   number returned before deciding nothing fits.
 - `variableCount` above zero marks a game or quiz-show template (it defines variables such as
   lives or score and its screens are wired together). Ordinary templates have 0.

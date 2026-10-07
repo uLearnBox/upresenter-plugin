@@ -21,9 +21,12 @@ Contents: 1 Agree the design, 2 Set up the deck, 3 Plan the layout suite, 4 Buil
    topic (`styles.md`, section 2), then its spec in `design-systems.md`. For a brand, start from
    the closest spec and replace its colors and fonts with the brand's (keep the roles: primary,
    seven accents, title, body, backgrounds).
-3. In one short message tell the user the style, the palette (the hex colors with their roles),
-   the title and body fonts, the background rhythm and two or three signature devices, and ask for
-   a go. **Wait for the answer** unless they asked you to decide.
+3. Unless they asked you to decide, ask with the **choice picker** (Ground rules in `SKILL.md`):
+   "Which design direction?" with two or three design languages that fit the topic as options. Each
+   option's description gives the palette (hex colors with their roles), the title and body fonts
+   and the signature devices; the best fit comes first, marked "(Recommended)". The user may type
+   their own brand colors and fonts instead. **Wait for the answer**, then say in one line what you
+   will build.
 
 ## 2. Set up the deck
 
@@ -125,6 +128,5 @@ Fix and look again (at most three rounds), then the content checks of `SKILL.md`
 
 Tell the user the style and the theme (its name in their theme library: they can edit its colors
 and fonts and give it to other presentations in the Design tab), the slides with their
-patterns, what you checked and fixed, and what the tools cannot do (animations and transitions,
-two-tone titles done as two text shapes, narration). Suggest previewing in the player and, if
+patterns, what you checked and fixed, and what the tools cannot do (two-tone titles done as two text shapes). Suggest previewing in the player and, if
 they like the look, duplicating the deck as the starting point for the next one.

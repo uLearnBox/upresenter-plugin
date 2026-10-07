@@ -16,7 +16,7 @@ work the same way, but fluid slots have no `maxChars`.
 
 ## 1. Finding and reading a template
 
-`listTemplates` returns up to `limit` templates (default 20, at most 50), sorted by name, and
+`listTemplates` returns up to `limit` templates (default 20, at most 50), newest first, and
 `total`, the number that matched. The gallery has about forty themed templates, so a call without
 filters shows only the first half: narrow before raising `limit`, and check that `total` is not
 larger than what came back.

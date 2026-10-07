@@ -12,6 +12,20 @@ apply them with the `edit-presentation` workflow and review the changed slides a
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - The presentation must be **open in an editor tab** and stay open (ask the user not to click around
   in it). Not open: `listOpenEditorContexts`, else `listPresentations` and give the user the
   `editorUrl`; with several editors pass the `sessionId`.
@@ -23,7 +37,7 @@ apply them with the `edit-presentation` workflow and review the changed slides a
 - Template first: judge the deck against its template (`getPresentationInfo` gives `templateId` and
   `themeId`; `listTemplates` and `getTemplateLayouts` show which layouts and `sample` slots exist).
   Recommend fixes that reuse a template layout rather than hand-built slides.
-- The tools cannot play the deck, hear audio, or see animations, transitions or the phone layout:
+- The tools cannot play the deck, hear audio, see animations and transitions in motion, or see the phone layout:
   say so in the report.
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
   `describeTool` and run it with `callTool`.
@@ -104,7 +118,10 @@ wrong and the fix.
 **Tracking and interaction wiring** (`getVariables`, `getInteractions {slideId}` per interactive
 slide, `getPresentationSettings`, `getQuestionsInfo`)
 - Unused variables: a variable that no interaction, condition or `{{name}}` text reads or writes is
-  dead weight; a variable read but never changed is a bug (a score nothing adds to).
+  dead weight; a variable read but never changed is a bug (a score nothing adds to), except the read-only
+  system variables (`$score`, `$passed`...), which the player updates itself. A hand-made `score`
+  variable that every question adds to only duplicates the built-in `$score`: suggest the built-in
+  one unless the deck needs weighting, penalties or team scores.
 - Dead conditions: a rule that can never be true (a threshold above the maximum score, comparing a
   text variable with a number, a variable that was deleted); two conditional `go-to-slide`
   actions that overlap or leave a gap (for example `>= 20` and `< 20` is complete, `> 20` and
@@ -128,11 +145,21 @@ slide, `getPresentationSettings`, `getQuestionsInfo`)
 - Nothing essential is shown only on hover (phones have no hover).
 
 **Accessibility**
-- Text contrast is strong on every background, body text is large enough, and no meaning depends on
-  color alone.
+- Text contrast is strong on every background, body text is large enough (18px or more), and no
+  meaning depends on color alone (a right or wrong answer also needs a word or an icon).
+- Titles are real title shapes (not large body text), and the presentation language matches the
+  content (`getPresentationSettings`), which the player uses for its own labels.
+- Media: audio and video keep their controls (`getPresentationState` shows `playback`), nothing
+  plays sound on its own unless an `unmute-media` action comes first, and a video that carries the
+  message is also explained in text (the tools cannot add captions).
+- Nothing essential is shown only on hover or only after an animation; motion is subtle and
+  consistent (`getSlideInfo` shows the slide transition, `getPresentationState` the animations and
+  playback): flag long delays, many animated shapes on one slide, a different transition on every
+  slide and effects on text learners must read quickly.
 - Known app gaps (report as limits, not as the author's fault): the editor has no control for image
-  alt text, so informative pictures cannot be described to screen readers; say what the picture
-  shows in nearby text instead. Animations and hover-only content are not checkable here.
+  alt text, speaker notes or video captions, so informative pictures cannot be described to screen
+  readers; say what the picture shows in nearby text instead. How motion looks cannot be checked
+  here, only what is set. Fixes go through `edit-presentation`.
 
 ### 5. Report
 
@@ -145,6 +172,9 @@ Give the user:
 3. What you could not check (no slide pictures, audio and video content, text inside images,
    animations and transitions, and how interactions and games behave when played).
 4. A question: which fixes should be made now. Offer to make all the "fix before presenting" ones.
+   Also offer, without doing it unasked, to leave the findings as review comments on the slides
+   (`addComment`, one per finding, written under the user's name). A review itself changes
+   nothing: never add comments unasked and never resolve existing ones.
 
 ### 6. After the user chooses
 

@@ -87,5 +87,5 @@ assignment and report access are in the app only: no tool does them.
 ## 5. What no tool can do
 
 No MCP tool exists for: creating or assigning classes, reading or exporting reports, exporting
-packages or files, slide animations, slide transitions, text-to-speech narration. Be explicit,
+packages or files. Be explicit,
 give the user the editor or dashboard steps, and never claim these were done.

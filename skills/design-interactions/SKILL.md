@@ -12,6 +12,20 @@ structure; compose by hand only when none does.
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - Call tools one at a time. Pass `slideId` with every `shapeId` (shape ids repeat on every slide)
   and use ids that tool results returned.
 - The editor tab must be open: `listOpenEditorContexts`; if none, `getNewPresentationLink` (with
@@ -22,8 +36,7 @@ structure; compose by hand only when none does.
 - Fluid decks (scrolling cards) come only from fluid templates; never convert with `setLayoutType`.
   Overlapping tab panels and flip cards need absolute positioning, which fluid cards do not
   allow: in a fluid deck use stacked reveals (a hidden block shown in place) instead.
-- Not available as tools: animations, slide transitions, narration or TTS, export, classes,
-  reports. Point the user to the editor for these.
+- Not available as tools: narration or TTS (only when the connection lists `addNarration`), export, classes, reports. Point the user to the editor for these.
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
   `describeTool` and run it with `callTool`.
 
@@ -56,7 +69,10 @@ structure; compose by hand only when none does.
 ## Core rules
 
 - `addInteraction {slideId, shapeId?, eventType, actionType, actionData?, condition?}`; without
-  `shapeId` the interaction belongs to the slide (`slide-enter`, `timer`).
+  `shapeId` the interaction belongs to the slide (`slide-enter`, `timer`). The full tables of
+  events per target, every action with its `actionData`, variable operations, the 17 system
+  variables and condition operators are in `references/events-actions-variables.md`: read it
+  before wiring by hand.
 - Events: `click`, `double-click`, `mouse-enter`, `mouse-leave`, `slide-enter`, `timer`,
   `question-correct`, `question-incorrect`, `question-answered`, `media-ended`.
 - Actions on one event run in the order added; navigation does not stop the chain, so put show
@@ -64,7 +80,7 @@ structure; compose by hand only when none does.
 - A shape cannot show, hide or toggle itself: target its group (a child may hide its parent).
 - `hide` collapses the shape; initially hidden keeps its space until shown.
 - Hover does nothing on phones and tablets: never hide essential content behind hover.
-- `show-tooltip` is not allowed on `slide-enter`; `open-url` is blocked in public presentations.
+- `show-tooltip` is only for shapes, not slides; `open-url` is blocked in public presentations.
 - Operands are typed objects: `{"kind": "literal", "value": 10}` or `{"kind": "variable",
   "variableId": "..."}`, never a bare number. A condition is `{match: "all" | "any", rules:
   [{variableId, operator, operand}]}` and there is no else branch.

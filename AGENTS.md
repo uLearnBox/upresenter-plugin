@@ -27,9 +27,10 @@ editor.
 |---|---|
 | New presentation, lesson, pitch or report (fixed slides or fluid) | `create-presentation` |
 | Quiz, test, knowledge check, scoring and results | `create-quiz` |
-| Change an existing deck: wording, order, layout, styling, undo | `edit-presentation` |
+| Change an existing deck: wording, order, layout, styling, undo, act on reviewer comments | `edit-presentation` |
 | Translate or adapt a deck to another language or locale | `localize-presentation` |
 | Audit a deck and report what to fix, without changing it | `review-presentation` |
+| Slide transitions, shape animations, looping media, self-running decks | `add-motion` |
 | Games: quiz show, escape room, timers, lives, variables, branching | `build-game` |
 | Reveals, tabs, flip cards, hotspots, events, actions, conditions | `design-interactions` |
 | Completion and success criteria, attempts, resume, player buttons and mode | `configure-player-tracking` |
@@ -43,17 +44,26 @@ the skills describe) before telling the user it is done.
 
 Say so plainly, point the user to the uPresenter editor, and never pretend:
 
-- animations and slide transitions (templates bring their own);
-- narration, text to speech, music generation;
+- narration (only through `addNarration` when the connection lists it), music generation, version history, speaker notes, image alt text, video captions;
 - export (PowerPoint, PDF, video, SCORM, xAPI) and publishing or sharing settings;
 - classes, assignments, reports and account or billing settings.
 
-AI image generation is not part of the public tool set. Do not convert a fixed deck to fluid with
+AI image generation is available only when the connection lists `generateShapeImage`. Do not convert a fixed deck to fluid with
 `setLayoutType`: choose a fluid template instead.
 
 ## Ground rules
 
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - Use only the tools the server lists; the tool names in the skills are exact.
+- When the user must choose (template, style, game, language, cost), use the host's structured question
+  tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex) with 2 to 4 options and a
+  recommended first option; fall back to a numbered list only when there is no such tool.
 - Codex connects to a lean profile (`?tools=lean`): about 17 core tools plus the gateway tools
   `searchTools`, `describeTool` and `callTool`. On any client that shows only part of the tools, when a
   tool named in a skill is missing, find it with `searchTools`, read its schema with `describeTool`

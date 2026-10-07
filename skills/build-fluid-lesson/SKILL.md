@@ -11,6 +11,20 @@ built from **fluid templates**, never by converting a slide deck.
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - Call tools one at a time. Pass `slideId` with every `shapeId` (shape ids repeat on every card)
   and use ids that tool results returned.
 - The editor tab must be open: `listOpenEditorContexts`; if none, `getNewPresentationLink` and ask
@@ -22,8 +36,7 @@ built from **fluid templates**, never by converting a slide deck.
   Never use `setLayoutType` to turn a slide deck into a fluid one: it changes only the sizing
   mode, the 16:9 layouts stay as they are and the result is a slide deck in disguise. If the
   open deck is a slide deck, do not build in it: give the user a new fluid link.
-- Not available as tools: animations, slide transitions, narration or TTS, export, classes,
-  reports. Point the user to the editor for these.
+- Not available as tools: narration or TTS (only when the connection lists `addNarration`), export, classes, reports. Point the user to the editor for these.
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
   `describeTool` and run it with `callTool`.
 
@@ -61,7 +74,8 @@ built from **fluid templates**, never by converting a slide deck.
    screens as long as they stay in flow. `reviewSlides` flags text that spills out of its box or
    an inner card and unfilled placeholders.
 10. **Report**: template and why, card list, what is sample content that stayed (pictures),
-    and what the tools cannot do (phone preview, animations, export).
+    and what the tools cannot do (phone preview, export). A fluid deck is the right choice for phones:
+    slide transitions do not animate a tall card, so leave them off.
 
 ## Flow rules (what keeps a card responsive)
 

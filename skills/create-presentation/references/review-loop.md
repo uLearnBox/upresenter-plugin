@@ -33,7 +33,8 @@ deck one slide of each layout plus every slide you changed). `presentationId` is
 the contrast enough (light text on a light picture is a fault); do formulas show as typeset math;
 are there empty or crowded areas or clashing pictures; does the slide look like the others; does a
 sample picture show the wrong subject; does a chart still carry a sample title or legend; does a
-leftover sample figure or label remain? The picture shows the saved state, so look again after your
+leftover sample figure or label remain? The picture is drawn from the open editor's current state (the saved state when no editor is open;
+sample text such as "Click to add title" shows as placeholder text), so look again after your
 edits. If `getSlideImage` cannot draw a slide, carry on with the measured review and the content
 checks.
 
@@ -56,6 +57,7 @@ One line per slide: what was created and which template was used; that the deck 
 what you fixed; which features were used; and what needs the user's input: problems you could not
 fix, facts to confirm, pictures to replace (list the slides whose sample picture stays), generated
 pictures and the credits left, accents to check in a non-English deck, interactions and games to
-test in the player, and what was asked but is not possible with the tools (animations,
-transitions, narration, TTS, exports). Suggest next steps: preview in the player, share, export
+test in the player, and what was asked but is not possible with the tools (exports, and narration
+without `addNarration`). `getSlideImage` draws at most 1920 x 1080, so very tall or portrait presets (the social
+story and A4 portrait sizes) come back cropped: say so instead of judging their edges. Suggest next steps: preview in the player, share, export
 for an LMS from the editor, or restyle with another template.

@@ -102,7 +102,9 @@ subtract 1, then `go-to-slide` Game Over with the condition `lives lte 0`.
 
 **M2 Board with done tiles (Jeopardy).** A board slide with one button per question
 (`go-to-slide` to its clue). One boolean per question (`q1Done`). On the question
-`question-correct`: set `q1Done` true, add points to `score`, `go-to-slide` back to the board.
+`question-correct`: set `q1Done` true, add points to `score` (your own variable: clue values and
+team scores are not the question `points` that the built-in `$score` adds up), `go-to-slide` back
+to the board.
 Board `slide-enter`: `hide` the tile when `q1Done isTrue` (and `show` a done mark). A Final score
 button appears when every flag is true (`match: all`). Team play: one number variable per team
 (`score1`...) as in the Jeopardy template.
@@ -152,4 +154,4 @@ text `You rolled {{roll}}`, then branch on `roll` with conditions (Dice Arena do
 
 The tools build the game but cannot play it. Say which paths to test in the player (winning,
 losing, Play again, leaving and resuming), which links and variables you wired, whether the
-background music is set, and that animations, transitions and narration are added in the editor.
+background music is set, and that narration is added in the editor unless `addNarration` was used.

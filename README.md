@@ -21,13 +21,14 @@ server at `https://mcp.upresenter.ai/mcp`. With it the assistant can:
 - set up the player: completion and success criteria, attempts, resume, buttons and mode;
 - review and summarize an existing presentation.
 
-Nine skills teach the assistant how to do this well: `create-presentation` (from a template or
+Ten skills teach the assistant how to do this well: `create-presentation` (from a template or
 designed from scratch), `create-quiz`, `edit-presentation`, `localize-presentation` (translate a
 deck and adapt it to a locale), `review-presentation` (audit a deck and report what to fix),
-`build-game`, `design-interactions`, `configure-player-tracking` and `build-fluid-lesson`.
+`build-game`, `design-interactions`, `add-motion`, `configure-player-tracking` and
+`build-fluid-lesson`.
 `AGENTS.md` summarizes the workflow for agents that read it (Codex and others).
 
-The tools cannot create animations or transitions, narration, exports (PowerPoint, PDF, SCORM) or
+The tools cannot create exports (PowerPoint, PDF, SCORM) or
 classes and reports: do those in the uPresenter editor.
 
 ## Install

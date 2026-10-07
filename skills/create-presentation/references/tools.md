@@ -3,9 +3,12 @@
 A quick map of the uPresenter tools and their main arguments. The live tool list always wins:
 if a call is rejected for a bad argument, read that tool's schema and fix the call.
 
-Common geometry on every `add*` tool: `x, y, width, height, name` (CSS px; x and y only matter
-inside freeform containers). Every insert goes into the **current slide**, and into the
-**selected group** if one is selected; after an insert the new shape is selected. In a deck made
+Geometry arguments `x, y, width, height, name` (CSS px; x and y only matter inside freeform
+containers) exist only on the text, button, icon, svg, image, placeholder, media, 3D model and
+progress tools. `addList`, `addChart`, `addInfographic`, `addTimeline`, `addTable`, `addQuestion`,
+`addDivider` and `addGroupLayout` take none: size them afterwards with `setShapeCSSStyle`. Every
+insert goes into the **current slide**, and into the **selected group** if one is selected
+(`addTable` always goes to the slide root); after an insert the new shape is selected. In a deck made
 from a template (freeform) inserts land on top of each other: see `composed-slides.md`.
 
 **Ids.** Slide and shape ids come from tool results; pass them back as given. Shape ids repeat on
@@ -35,7 +38,7 @@ when more than one editor tab is open.
   Each has `themeId`, `name`, `dark`, `palette` (primary, seven accents, title, subtitle, body,
   slide and page backgrounds), `fonts` (title, body), `radius` and `imageStyle`.
 - `listTemplates {query?, category?, language?, layoutType?, includeLegacy?, limit?}` lists the
-  gallery templates (up to `limit`, default 20, max 50, sorted by name) with the `total` that
+  gallery templates (up to `limit`, default 20, max 50, newest first) with the `total` that
   matched. `layoutType` is `slide` (default) or `fluid`: a fluid presentation is built from a fluid
   template, never by converting a slide one (`fluid.md`). Each result has:
   `templateId`, `name`, `description`, `categories`, `language`, `themeId`, `palette`, `fonts`,
@@ -92,6 +95,8 @@ when more than one editor tab is open.
 ## Slides and layout
 
 - `insertTemplateSlides {slides: [{slideId} | {tag}], index?, templateId?, applyThemeFromTemplate?}`
+  (at most 30 slides per call, so put a whole game flow in one call; the template's kind, slide or
+  fluid, must match the deck's)
   clones template layouts into the open deck, in order, starting at `index` (default: after the
   current slide). `templateId` defaults to the deck's own template (pass the chosen one). With
   `applyThemeFromTemplate: true` the deck also switches to the template's theme (restyles every
@@ -112,7 +117,8 @@ when more than one editor tab is open.
 - `setSlideName {slideId, name}` (outline label). `setSlideTitle {slideId, title}` replaces the
   slide's title text with plain text (losing its formatting and formulas) and renames the slide:
   to change a title use `setShapeText` on its shape instead
-- `setContainerLayout {slideId, shapeId?, layout, gap, alignItems, justifyContent}`
+- `setContainerLayout {slideId, shapeId?, layout, gap, alignItems, justifyContent}`: `gap` is a CSS
+  string (`"16px"`), unlike `addGroupLayout {gap, padding}` which take plain numbers
   - layout: `row, column, col-2 ... col-6, ratio-2-1-1, ratio-1-1-2, ratio-1-2, ratio-2-1,
     tiles-2-1, tiles-1-2, tiles-2-1-col, tiles-1-2-col, none`
   - alignItems: `stretch start center end`; justifyContent also `space-between space-around
@@ -141,7 +147,7 @@ when more than one editor tab is open.
 - `addProgress {variant: bar | circle, min, max, value, variableId, fillColor, progressColor,
   trackColor}`: bind it to a variable for a live meter; pass colors from the theme at creation
 - `addShape {shapeType: "dv", subTypeName, ...}`: geometric shapes (`rect`, `round-rect`, `oval`,
-  `chevron`, `star-5`... 101 subtypes) for diagrams and decoration; prefer the semantic `add*`
+  `chevron`, `star`, `star-6`... 101 subtypes) for diagrams and decoration; prefer the semantic `add*`
   tools for content
 
 ## Styling
@@ -156,9 +162,24 @@ when more than one editor tab is open.
   `border-width: "0 0 0 4px"` instead.
 - `setShapePositioningMode {slideId, shapeId, positioningMode: inherit | flow | absolute}`
 - `setShapeInitiallyHidden {slideId, shapeId, initiallyHidden}`
+- `groupShapes {slideId, shapeIds}` wraps existing shapes of the same parent into a group and returns
+  `groupShapeId` (a flow container; questions cannot join); `ungroupShape {slideId, shapeId}`
+  dissolves it and returns the child ids; `flipImage {slideId, shapeId, direction: horizontal |
+  vertical}` mirrors an image.
+- `setInfographicItemCount {slideId, shapeId, itemCount}` adds items to the end of an existing
+  infographic or timeline (or drops them from the end) and returns `itemShapeIds`; the wording of an
+  item is edited with `setShapeText` on the text shapes inside it (`getPresentationState` lists
+  them). `duplicateShape` does nothing on an infographic item.
+- `listResources {kind?, query?}` lists the pictures, audio, video and 3D models already in the
+  deck's library with the slides that use them; pass an item's `source` to `addImage`, `addAudio`,
+  `addVideo`, `replaceImage` or `setBackgroundMusic` to reuse it instead of uploading again.
+- `setShapeLocked {slideId, shapeId, locked?}` locks a background or frame against accidental moves
+  on the editing canvas (no effect in Present; tools can still change it; `getPresentationState`
+  shows `locked`).
 - `duplicateShape`, `deleteShape`, `moveShapeForward`, `moveShapeBackward`, `moveShapeToFront`,
   `moveShapeToBack`, `selectShape`: all `{slideId, shapeId}` (the slide is shown first);
-  `selectShapes`, `deselectAll`, `undo`, `redo`
+  `selectShapes`, `deselectAll`, `undo`, `redo`. `duplicateShape` and `duplicateSlide` return only
+  `{success}`, no new id: read the deck again (`getPresentationState`) before wiring the copy.
 
 Theme variables: `rgb(var(--aie-accent-0-rgb))` (primary) through `--aie-accent-7-rgb`,
 `rgb(var(--aie-title-rgb))`, `rgb(var(--aie-subtitle-rgb))`, `rgb(var(--aie-body-rgb))`,
@@ -178,8 +199,17 @@ Image sources: `source` (a resource filename or an http(s) URL), `dataUrl`, or `
 - `upscaleImage {slideId, shapeId, scale: 2 | 4 | 8, faceEnhance?}` (offered only when the connection
   has AI media; uses credits) makes an existing raster image sharper without replacing it.
 - `setContainerBackgroundImage {slideId, shapeId?, source, backgroundSize, backgroundPosition}`
-- `addAudio {source, controls, autoplay}`, `addVideo {source, controls, autoplay}`,
-  `addVideoPlaceholder`
+- `addAudio {source, controls, autoplay}`, `addVideo {source, controls, autoplay}` (video files:
+  mp4 or webm), `addVideoPlaceholder`
+- AI media (listed only on connections that allow credits): `removeImageBackground {slideId, shapeId}`
+  cuts the background out of an image (several seconds, the original is kept), and `addNarration
+  {slideId, text, voice?, instructions?, shapeId?}` adds spoken narration as an audio shape (voices
+  alloy, ash, coral, echo, fable, nova, onyx, sage, shimmer; `shapeId` of an existing narration
+  regenerates it). Ask before spending credits, and write narration text for the ear.
+- `setMediaPlayback {slideId, shapeId, controls?, autoplay?, loop?, mode?}` changes an existing
+  audio, video or embedded video: loop (audio and video only), autoplay, controls, and `mode:
+  default | simple` for audio. A looping media never fires `media-ended`; browsers block sound
+  autoplay until the learner has interacted, so pair autoplay with an `unmute-media` action.
 - `addEmbeddedVideo {provider: youtube | vimeo | dailymotion | loom, url, controls, autoplay}`
 - `addModel3D {source, fileName (.glb/.gltf)}`
 
@@ -229,10 +259,14 @@ case-sensitive). Read back with `getQuestionsInfo {scope: "all-slides", includeA
   through it: `addChart` can add them with built-in sample data only, so tell the user to
   edit those values in the editor.
 - `addTable {rows, columns, preset: basic | header | sideHeader, headerRow, headerColumn, csv |
-  data[][]}`; `setTableStyle`, `setTableCellsText {cells: [{rowIndex, columnIndex, text}]}` (many cells), `setTableCellText
+  data[][]}`; `setTableStyle {headerRow?, headerColumn?, borderWidth?, borderColor?, headerFill?, cellFill?}`,
+  `setTableCellsText {cells: [{rowIndex, columnIndex, text}]}` (many cells), `setTableCellText
   {rowIndex, columnIndex, text}` (one cell, keeps its styling), `selectTableArea {targetType: table |
   row | column, rowIndex?, columnIndex?}` (select the area a following style call applies to),
-  `editTableStructure {action, direction}`, `getTableInfo`. Text styles for tables go through
+  `editTableStructure {action: addRow | addColumn | deleteRow | deleteColumn | moveRow |
+  moveColumn, rowIndex?, columnIndex?, direction?}` (zero-based; the last row or column cannot be
+  deleted; a move needs `direction`), `getTablesInfo {slideIndex?, currentSlideOnly?, includeCells?}`,
+  `getTableInfo`. Text styles for tables go through
   `setTextStyle` with `targetType: row | column | cell`.
 
 ## Variables and interactions
@@ -256,7 +290,11 @@ case-sensitive). Read back with `getQuestionsInfo {scope: "all-slides", includeA
     `{"kind":"variable","variableId":"..."}`.
   - condition: `{match: all | any, rules: [{variableId, operator: eq | ne | gt | gte | lt | lte |
     contains | empty | notEmpty | isTrue | isFalse, operand}]}`
-- `getInteractions {slideId, shapeId?}`, `updateInteraction`, `removeInteraction`
+- `getInteractions {slideId, shapeId?}`, `updateInteraction {slideId, shapeId?, eventIndex,
+  actionIndex, eventType?, actionType?, actionData?, condition?, removeCondition?, timerSeconds?}`,
+  `removeInteraction {slideId, shapeId?, eventIndex, actionIndex}`: removing the last action of an
+  event deletes the event and shifts every later `eventIndex`, so call `getInteractions` again after
+  each removal. Full rules: `design-interactions/references/events-actions-variables.md`.
 - A show, hide, toggle or media action cannot target the shape it is attached to.
   `question-correct` and `question-incorrect` attach only to graded question shapes,
   `media-ended` only to audio or video shapes, and `slide-enter` only to slides (omit `shapeId`).
@@ -273,20 +311,42 @@ case-sensitive). Read back with `getQuestionsInfo {scope: "all-slides", includeA
   `ssn` slide number
 - `setPlayerMode {mode: presentation | quiz | game}`, `setNavigationLock {locked}`,
   `setSlideAutoAdvance {slideId, seconds}` (0 turns it off)
-- `setBackgroundMusic {source, name?, volume?}` (an audio resource or HTTPS URL) loops one track
+- `setSlideTransition {slideId, transition, direction?, duration?, applyToAll?}` plays when the deck
+  moves onto that slide (`none` removes it; `applyToAll: true` gives every slide the same one; prefer one
+  calm transition such as `fade` for the whole deck). A `direction` must be one the transition
+  offers (listed in the tool description); transitions without one (`fade`, `flash`, `bounce`,
+  `morph`, `galaxy`, `ripple`, `elastic`) ignore it. `setShapeAnimation {slideId, shapeId, effect,
+  direction?, delay?, duration?, repeat?, trigger?}` gives a shape an entrance (`fade-in`, `fly-in`,
+  `zoom-in`, `rise-up`...), exit (`fade-out`...) or emphasis (`pulse`, `spin`, `blink`...) effect;
+  one per kind per shape, `delay` staggers a group, `none` clears it. Names and directions are in the
+  tool descriptions; an effect that does not match the `trigger` (an entrance effect as `exit`) or a
+  direction outside the effect's list is refused. The picture from `getSlideImage` shows the end
+  state, not the motion. Plan motion with the `add-motion` skill.
+- `setPlayerAppearance {skin?: classic | modern, padding?}` styles the player around the slides for
+  the whole deck (padding 0 to 256 px, default 32).
+- `setBackgroundMusic {source, name?, volume?, loop?}` (an audio resource or HTTPS URL; or `base64` +
+  `mimeType` + `fileName` to upload; the first call needs one of them) loops one track
   across the deck; it starts muted until an `unmute-media` action (put it first on the Start
   button); `remove: true` clears it
 - Text can show `{{variable name}}`, `{{$score}}` or `{{$timeLeft}}` in the player.
+
+## Review comments
+
+- `getComments {slideId?, includeResolved?}` returns each thread with its `commentId`, slide, shape,
+  author, text, `resolved` and replies. `addComment {slideId, shapeId?, text}`, `replyToComment
+  {commentId, text, reopen?}` and `resolveComment {commentId, resolved?}` write under the signed-in
+  user's name, are not part of undo and never change a slide. Resolve a thread only after you did
+  what it asked.
 
 ## Read-only
 
 `getPresentationInfo`, `getPresentationSettings`, `getPresentationBackgrounds`, `getSlideInfo
 {slideIndex}`, `getSlideCSSStyle`, `getShapeCSSStyle`, `getSupportedQuestionTypes`,
-`getSupportedChartTypes`, `getQuestionsInfo`, `getChartInfo`, `getTablesInfo`.
+`getSupportedChartTypes`, `getQuestionsInfo`, `getChartInfo`, `getTablesInfo`, `listResources`,
+`getComments`.
 
 ## Not available through the tools
 
-Entrance and exit animations, slide transitions, narration or text-to-speech, music generation,
-per-word text styling (two-tone titles, hollow letters) and exporting (SCORM, PDF, video). Templates bring their own
-animations and transitions with their layouts. Tell the user when a request needs one of these:
-they can do it in the editor.
+Music generation, narration without `addNarration`, per-word text styling (two-tone titles, hollow
+letters) and exporting (SCORM, PDF, video). Tell the user when a request needs one of these: they
+can do it in the editor.

@@ -10,6 +10,20 @@ reporting.
 
 ## Ground rules
 
+- **Ask with the host's choice picker, not a paragraph.** When the user must decide (a template, a
+  style or theme, a game, a language, a cost), use the host's structured question tool if it has one
+  (for example `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or the question picker of
+  the Claude and ChatGPT apps): one question per decision, 2 to 4 options each with a one-line
+  description (put a preview link in it), the recommended option first and marked "(Recommended)", and
+  always room for the user's own answer. Batch several decisions into one call. Only when the host has no
+  such tool, give a short numbered list and wait for the reply.
+- Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
+  browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
+- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
+  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
+  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
+  again without an authentication error. An absent editor requires the user to open the editor link,
+  not a switch to browser automation.
 - A presentation must be **open in an editor tab** and stay open (ask the user not to click around
   in it). If none is open: `listOpenEditorContexts`, then `listPresentations` or
   `getNewPresentationLink` (see `create-presentation`, step 4). With several editors open pass the
@@ -20,7 +34,7 @@ reporting.
   template (`listTemplates`, `getTemplateLayouts`, `insertTemplateSlides`). A blank slide is only
   for a type the template lacks. Slots with `sample` text must be replaced or deleted.
 - Check with `reviewSlides` and `getSlideImage` before reporting; the tools cannot play the quiz.
-- Not possible with the tools: animations, transitions, narration/TTS, exports. Tell the user to
+- Not possible with the tools: exports (narration only via `addNarration` when listed). Tell the user to
   use the editor.
 - If a tool named here is not in your tool list, find it with `searchTools`, read its schema with
   `describeTool` and run it with `callTool`.
@@ -141,25 +155,37 @@ Read the result back with `getQuestionsInfo {scope: "all-slides", includeAnswers
 
 ## Score tracking
 
-1. `createVariable {name: "score", type: "number", defaultValue: 0}` returns the variable id (a UUID such as
-   `3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813`, used in the examples below; always use the one returned).
-2. On every graded question add an interaction that adds its points on a correct answer:
+The score is built in: every graded question adds its `points` when answered correctly, and the
+read-only system variables follow it (`$score`, `$maxScore`, `$scorePercentage` 0 to 100,
+`$correctAnswerCount`, `$answeredQuestionCount`, `$passed`; the full list is in `design-interactions`
+`references/events-actions-variables.md`). Do not create a `score` variable that every question
+adds to: it duplicates the built-in one and drifts when a question changes. Surveys never count.
+
+- Show it in any text: `Score: {{$score}} of {{$maxScore}}` or `{{$scorePercentage}}%`.
+- Bind a meter to it: `addProgress {variant, variableId: "$scorePercentage", min: 0, max: 100}`.
+- Branch on it: conditions use the system ids directly, as in the next section.
+- Create your own number variable only when the built-in score cannot express the rule: negative
+  marking, weighted bonuses, team or round scores, a streak. Then add its `adjust-variable`
+  interactions on `question-correct` / `question-incorrect`:
 
 ```json
-{"tool": "addInteraction", "args": {"slideId": 3, "shapeId": 7, "eventType": "question-correct", "actionType": "adjust-variable", "actionData": {"variableId": "3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813", "operation": "add", "operand": {"kind": "literal", "value": 10}}}}
+{"tool": "addInteraction", "args": {"slideId": 3, "shapeId": 7, "eventType": "question-correct", "actionType": "adjust-variable", "actionData": {"variableId": "<id from createVariable>", "operation": "add", "operand": {"kind": "literal", "value": 10}}}}
 ```
 
 Operands are typed objects (`{"kind": "literal", "value": 10}`), never a bare number.
 `question-correct` and `question-incorrect` attach only to graded question shapes.
+Pass slide and shape ids exactly as the tool results returned them.
 
 ## Branching on the score
 
 Build the target slides first so their ids exist. Then add two conditional `go-to-slide`
-actions to the same button; each runs only when its condition holds:
+actions to the same button; each runs only when its condition holds. Use `$passed` when the pass
+mark is already set with `setSuccessCriteria` (the quiz and the report then agree on what passing
+means), or compare `$scorePercentage` with a number:
 
 ```json
-{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 12}, "condition": {"match": "all", "rules": [{"variableId": "3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813", "operator": "gte", "operand": {"kind": "literal", "value": 20}}]}}}
-{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 11}, "condition": {"match": "all", "rules": [{"variableId": "3f6c1a9e-8d2b-4c57-9a41-b7e0d5c2f813", "operator": "lt", "operand": {"kind": "literal", "value": 20}}]}}}
+{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 12}, "condition": {"match": "all", "rules": [{"variableId": "$passed", "operator": "isTrue"}]}}}
+{"tool": "addInteraction", "args": {"slideId": 9, "shapeId": 21, "eventType": "click", "actionType": "go-to-slide", "actionData": {"slideId": 11}, "condition": {"match": "all", "rules": [{"variableId": "$passed", "operator": "isFalse"}]}}}
 ```
 
 A review slide should end with a button back to the questions.
@@ -170,15 +196,37 @@ Templates rarely have a results layout: compose it (in a template deck inside th
 group of `create-presentation` `references/composed-slides.md`). Games with lives, timers and
 boards: `create-presentation` `references/games.md`.
 
-- Title text, then `addProgress {variant: "circle", min: 0, max: <total points>, variableId,
+- Title text, then `addProgress {variant: "circle", min: 0, max: 100, variableId: "$scorePercentage",
   progressColor: "rgb(var(--aie-accent-0-rgb))", trackColor: "rgba(var(--aie-body-rgb), 0.2)"}`.
-  The circle shows no number: add a text such as `Score: {{score}}`.
-- A "Try again" button with two interactions in this order: `adjust-variable` with
-  `operation: "reset"`, then `go-to-slide` to the first question. A retry only reopens questions
-  that allow more than one attempt.
+  The circle shows no number: add a text such as `Score: {{$score}} / {{$maxScore}}`.
+- A "Try again" button: `go-to-first-slide` (or `go-to-slide` to the first question). A retry only
+  reopens questions that allow more than one attempt; if you track your own variables, run
+  `adjust-variable` with `operation: "reset"` for each one first.
 - A slide-level `slide-enter` interaction with `actionType: "play-confetti"` celebrates the
-  result (`actionData: {"confettiType": "fireworks"}`).
+  result (`actionData: {"confettiType": "fireworks"}`); give it a `$passed` condition to
+  celebrate a pass only.
 - `finish-presentation` on a final button closes the attempt for LMS reporting.
+
+## Scoring policies
+
+- **Weighting**: set `points` per question (integers, 1 to 1000): harder questions get more.
+- **Pass mark**: `setSuccessCriteria {condition: "sc", value: 70, unit: "p"}`, then branch on
+  `$passed`. There is no partial credit: a question is fully right or scores nothing.
+- **Attempts**: `maxAttempts` on a question limits its retries; `setMaxAttempts` limits the whole
+  deck.
+- **Negative marking or penalties**: not built in; use your own number variable that
+  `question-incorrect` subtracts from, and show it next to `{{$score}}`.
+
+## Question banks, timed exams and surveys
+
+- **There is no question pool.** To give each learner a different set, put the questions on
+  separate slides and use `go-to-random-slide` with `slideIds` (the candidates) from a start
+  button, with a counter variable to stop after N questions. Say that it can repeat a slide.
+- **Timed exam**: a slide `timer` event (`timerSeconds`) with `finish-presentation` or a
+  `go-to-slide` to the results; show the countdown with `{{$timeLeft}}`. A timer is per slide, not
+  per exam.
+- **Survey or poll**: `mode: "survey"` on each question (never graded, no points). `question-answered`
+  fires after any submission, surveys included; use it for a "thank you" step.
 
 ## Tracking settings
 
