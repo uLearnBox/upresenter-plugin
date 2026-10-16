@@ -322,8 +322,11 @@ case-sensitive). Read back with `getQuestionsInfo {scope: "all-slides", includeA
   tool descriptions; an effect that does not match the `trigger` (an entrance effect as `exit`) or a
   direction outside the effect's list is refused. The picture from `getSlideImage` shows the end
   state, not the motion. Plan motion with the `add-motion` skill.
-- `setPlayerAppearance {skin?: classic | modern, padding?}` styles the player around the slides for
-  the whole deck (padding 0 to 256 px, default 32).
+- `setPlayerAppearance {skin?: classic | modern, layout?: floating | dock | course | rail, padding?}`
+  styles the player around the slides for the whole deck (padding 0 to 256 px, default 32). A
+  layout implies the modern skin and fixes where Submit / Next / Finish sit: floating (corner),
+  dock (end of one centred bar), course (top status bar, bottom action bar), rail (tools on the
+  left, actions under the slide).
 - `setBackgroundMusic {source, name?, volume?, loop?}` (an audio resource or HTTPS URL; or `base64` +
   `mimeType` + `fileName` to upload; the first call needs one of them) loops one track
   across the deck; it starts muted until an `unmute-media` action (put it first on the Start

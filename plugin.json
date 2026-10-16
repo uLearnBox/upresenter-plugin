@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "upresenter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Build and edit interactive presentations, lessons, quizzes and games in your uPresenter account.",
   "author": {
     "name": "uLearnBox",
