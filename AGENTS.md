@@ -66,7 +66,7 @@ AI image generation is available only when the connection lists `generateShapeIm
 - When the user must choose (template, style, game, language, cost), use the host's structured question
   tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex) with 2 to 4 options and a
   recommended first option; fall back to a numbered list only when there is no such tool.
-- Codex connects to a lean profile (`?tools=lean`): about 17 core tools plus the gateway tools
+- Codex and ChatGPT connect to a lean profile (`?tools=lean`): about 17 core tools plus the gateway tools
   `searchTools`, `describeTool` and `callTool`. Codex can still defer some of these behind its own
   `tool_search`, and a Codex that is connected to uPresenter as an app gets the full list, mostly
   deferred. When a tool named in a skill is missing, look it up with `tool_search` first, then find it

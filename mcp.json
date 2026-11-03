@@ -3,7 +3,7 @@
   "mcpServers": {
     "upresenter": {
       "type": "streamable-http",
-      "url": "https://mcp.upresenter.ai/mcp"
+      "url": "https://mcp.upresenter.ai/mcp?tools=lean"
     }
   }
 }
