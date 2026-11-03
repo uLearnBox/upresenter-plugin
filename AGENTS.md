@@ -55,19 +55,22 @@ AI image generation is available only when the connection lists `generateShapeIm
 
 - Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
   browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
-- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
-  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
-  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
-  again without an authentication error. An absent editor requires the user to open the editor link,
-  not a switch to browser automation.
+- Some hosts load only part of the MCP tools up front and keep the rest behind their own tool search
+  (`tool_search` in Codex). When a required tool is missing, first look it up there by its exact name
+  (for example `listTemplates`, `insertTemplateSlides`) and use it once it loads; then try
+  `searchTools`, `describeTool` and `callTool`. Stop and report incomplete MCP tool discovery, with the
+  missing tool names, only after both lookups came back empty. A successful sign-in does not prove that
+  tools loaded; do not ask the user to sign in again without an authentication error. An absent editor
+  requires the user to open the editor link, not a switch to browser automation.
 - Use only the tools the server lists; the tool names in the skills are exact.
 - When the user must choose (template, style, game, language, cost), use the host's structured question
   tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex) with 2 to 4 options and a
   recommended first option; fall back to a numbered list only when there is no such tool.
 - Codex connects to a lean profile (`?tools=lean`): about 17 core tools plus the gateway tools
-  `searchTools`, `describeTool` and `callTool`. On any client that shows only part of the tools, when a
-  tool named in a skill is missing, find it with `searchTools`, read its schema with `describeTool`
-  and run it with `callTool`.
+  `searchTools`, `describeTool` and `callTool`. Codex can still defer some of these behind its own
+  `tool_search`, and a Codex that is connected to uPresenter as an app gets the full list, mostly
+  deferred. When a tool named in a skill is missing, look it up with `tool_search` first, then find it
+  with `searchTools`, read its schema with `describeTool` and run it with `callTool`.
 - Prefer a designed template over a blank deck unless the user asks for a custom design.
 - Run one tool at a time and read each result before the next call.
 - Look at slides (`getSlideImage`) after building: no text spilling out of its card, no leftover

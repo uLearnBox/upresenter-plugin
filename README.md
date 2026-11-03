@@ -59,7 +59,7 @@ Then open `/plugins` in Codex, choose uPresenter and install it, and sign in to 
 asked. The plugin's `.mcp.json` registers the server `upresenter`; to register it yourself, run
 `codex mcp add upresenter --url "https://mcp.upresenter.ai/mcp?tools=lean"` and then `codex mcp login upresenter`.
 
-Codex fails when a server lists around 110 tools, so the Codex plugin uses the lean profile (`.codex-mcp.json`, `?tools=lean`): about 17 core tools plus three gateway tools, `searchTools`, `describeTool` and `callTool`. On any client that shows only part of the tools, the assistant finds a missing tool with `searchTools`, reads its schema with `describeTool` and runs it with `callTool`. Claude Code and ChatGPT keep the full list.
+Codex fails when a server lists around 110 tools, so the Codex plugin uses the lean profile (`.codex-mcp.json`, `?tools=lean`): about 17 core tools plus three gateway tools, `searchTools`, `describeTool` and `callTool`. Codex may still keep some tools behind its own `tool_search` (all of them are deferred this way when uPresenter is connected as an app instead of the plugin), so when a tool is missing the assistant first looks it up with `tool_search`, then finds it with `searchTools`, reads its schema with `describeTool` and runs it with `callTool`. Claude Code and ChatGPT keep the full list.
 
 ### ChatGPT
 

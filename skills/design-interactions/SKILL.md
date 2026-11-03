@@ -21,11 +21,13 @@ structure; compose by hand only when none does.
   such tool, give a short numbered list and wait for the reply.
 - Execute uPresenter operations through the `upresenter` MCP tools. Do not substitute Computer Use,
   browser automation, DOM scripts or direct HTTP calls unless the user explicitly requests that method.
-- If a required tool is missing, use `searchTools`, `describeTool` and `callTool` when available.
-  If those gateways are also missing, stop and report incomplete MCP tool discovery with the missing
-  tool names. A successful sign-in does not prove that tools loaded; do not ask the user to sign in
-  again without an authentication error. An absent editor requires the user to open the editor link,
-  not a switch to browser automation.
+- Some hosts load only part of the MCP tools up front and keep the rest behind their own tool search
+  (`tool_search` in Codex). When a required tool is missing, first look it up there by its exact name
+  (for example `listTemplates`, `insertTemplateSlides`) and use it once it loads; then try
+  `searchTools`, `describeTool` and `callTool`. Stop and report incomplete MCP tool discovery, with the
+  missing tool names, only after both lookups came back empty. A successful sign-in does not prove that
+  tools loaded; do not ask the user to sign in again without an authentication error. An absent editor
+  requires the user to open the editor link, not a switch to browser automation.
 - Call tools one at a time. Pass `slideId` with every `shapeId` (shape ids repeat on every slide)
   and use ids that tool results returned.
 - The editor tab must be open: `listOpenEditorContexts`; if none, `getNewPresentationLink` (with
